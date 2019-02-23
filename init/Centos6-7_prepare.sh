@@ -121,6 +121,7 @@ net.ipv6.conf.default.disable_ipv6 = 1
 # kubeadm init
 #WARNING: bridge-nf-call-iptables is disabled
 #WARNING: bridge-nf-call-ip6tables is disabled
+# start modprobe br_netfilter
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 
@@ -142,25 +143,28 @@ fs.file-max =165535
 net.ipv4.ip_local_port_range = 1024 65535
 kernel.panic = 5
 
-net.netfilter.nf_conntrack_max = 655350
-net.netfilter.nf_conntrack_tcp_timeout_established = 1200
+# NAT rule 
+# start modprobe ip_conntrack
+#net.netfilter.nf_conntrack_max = 655350
+#net.netfilter.nf_conntrack_tcp_timeout_established = 1200
 EOF
     ) >> /etc/sysctl.conf
     
 fi
 
 #modprobe ip_conntrack
+modprobe br_netfilter
 sysctl -p
 
+#ERROR
 #sysctl: cannot stat /proc/sys/net/netfilter/nf_conntrack_max: No such file or directory
 #modprobe ip_conntrack
-#若问题
-#执行sysctl -p 时出现：
-#sysctl -p
+
 #sysctl: cannot stat /proc/sys/net/bridge/bridge-nf-call-ip6tables:
 #No such file or directory
 #sysctl: cannot stat /proc/sys/net/bridge/bridge-nf-call-iptables:
 #No such file or directory
+
 #解决方法：
 #modprobe br_netfilter
 #ls /proc/sys/net/bridge
