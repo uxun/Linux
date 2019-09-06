@@ -1,0 +1,45 @@
+- name: downloading luarocks...
+  become: yes
+  become_user: root
+  get_url:
+    url: '{{luarocks_tgz_url}}'
+    dest: /tmp/{{luarocks_tgz}}
+    mode: 0644
+
+- name: unarchive luarocks...
+  become: yes
+  become_user: root
+  unarchive:
+    remote_src: yes
+    src: /tmp/{{luarocks_tgz}}
+    dest: '{{luarocks_build_dir}}'
+    creates: '{{luarocks_build_dir}}/{{luarocks_name}}'
+
+- name: configure luarocks...
+  become: yes
+  become_user: root
+  command: >-
+    ./configure
+    --with-lua={{luajit_dir}}
+    --lua-suffix=jit
+    --with-lua-include={{luajit_include_dir}}
+  args:
+    chdir: '{{luarocks_build_dir}}/{{luarocks_name}}'
+    creates: '{{luarocks_build_dir}}/{{luarocks_name}}/config.unix'
+
+- name: build and install luarocks...
+  become: yes
+  become_user: root
+  command: make build install
+  args:
+    chdir: '{{luarocks_build_dir}}/{{luarocks_name}}'
+    creates: /usr/local/bin/luarocks
+
+- name: install some rocks..
+  become: yes
+  become_user: root
+  with_items: '{{luarocks_install | default([])}}'
+  command: >-
+    /usr/local/bin/luarocks install --timeout={{luarocks_timeout_seconds}} {{item}}
+  args:
+    creates: /usr/local/lib/luarocks/rocks/{{item}}

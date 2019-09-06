@@ -1,0 +1,114 @@
+---
+#- import_tasks: main.yml
+#  when: 'ansible_distribution in ["CentOS","RedHat"]'
+#
+#- import_tasks: debian.yml
+#  when: 'ansible_distribution in ["Ubuntu","Debian"]'
+
+- name: update packages
+  yum:
+    update_cache: true
+
+- name: Install openresty dependencies
+  become: yes
+  become_user: root
+  with_items: "{{openresty_pkgs}}"
+  package:
+    name: "{{item}}"
+    state: present
+
+- name: download openresty package
+  become: yes
+  become_user: root
+  get_url:
+    url: "{{openresty_url}}"
+    dest: /tmp/
+
+- name: download drizzle package
+  become: yes
+  become_user: root
+  get_url:
+    url: "{{drizzle_url}}"
+    dest: /tmp/
+  when: drizzle_module_deploy
+
+- name: create build dirs
+  become: yes
+  become_user: root
+  with_items:
+    - '{{openresty_build_dir}}'
+    - '{{luarocks_build_dir}}'
+    - '{{drizzle_build_dir}}'
+  file:
+    path: '{{item}}'
+    state: directory
+    mode: '0755'
+
+- name: unarchive openresty
+  become: yes
+  become_user: root
+  unarchive:
+    remote_src: yes
+    src: /tmp/{{openresty_tgz}}
+    dest: "{{openresty_build_dir}}"
+    creates: '{{openresty_build_dir}}/{{openresty_name}}'
+
+- name: unarchive drizzle 
+  become: yes
+  become_user: root
+  unarchive:
+    remote_src: yes
+    src: /tmp/{{drizzle_tgz}}
+    dest: "{{drizzle_build_dir}}"
+    creates: '{{drizzle_build_dir}}/{{drizzle_name}}'
+  when: drizzle_module_deploy
+
+- name: drizzle7 compiling
+  become: yes
+  become_user: root
+  command: "{{item}}"
+  with_items:
+    - "./configure --without-server"
+    - "make libdrizzle-1.0" 
+    - "make install-libdrizzle-1.0"
+  args:
+    chdir: '{{drizzle_build_dir}}/{{drizzle_name}}'
+  when: drizzle_module_deploy
+
+- name: openresty compiling
+  become: yes
+  become_user: root
+  command: "{{item}}" 
+  args:
+    chdir: '{{openresty_build_dir}}/{{openresty_name}}'
+  with_items:
+    - "./configure --prefix=/usr/local/openresty -j{{openresty_j}} {{openresty_config_options}}"
+    - "make"
+    - "make install"
+
+- name: ln lbdrizzle.so.1
+  become: yes
+  become_user: root
+  command: ln -s /usr/local/lib/libdrizzle.so.1 /lib64/libdrizzle.so.1
+  args:
+   creates: /lib64/libdrizzle.so.1
+  when: drizzle_module_deploy
+
+- name: Install luarocks 
+  import_tasks: luarocks.yml
+  when: luarocks_module_deploy
+
+- name: cleanup...
+  become: yes
+  become_user: root
+  when: openresty_cleanup
+  with_items:
+    - '{{openresty_build_dir}}'
+    - '{{drizzle_build_dir}}'
+    - '{{luarocks_build_dir}}'
+    - '/tmp/{{openresty_tgz}}'
+    - '/tmp/{{drizzle_tgz}}'
+    - '/tmp/{{luarocks_tgz}}'
+  file:
+    path: '{{item}}'
+    state: absent
