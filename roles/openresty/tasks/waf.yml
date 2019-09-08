@@ -1,0 +1,18 @@
+- name: mkdir waf dir
+  file:
+    path: "{{item}}"
+    state: directory
+    owner: "{{openresty_user}}"
+    group: "{{openresty_user}}"
+  with_items:
+    - "{{waf_path}}"
+    - "{{waf_log_path}}"
+
+- name: git clone waf repo
+  git:
+    repo: "{{waf_repo}}"
+    dest: "{{waf_path}}"
+    force: yes
+
+- name: Configuration waf
+  template: src=config.lua.j2 dest="{{waf_path}}/config.lua"

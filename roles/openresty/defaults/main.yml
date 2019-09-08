@@ -4,6 +4,7 @@
 openresty_ver : '1.13.6.1'
 openresty_mirror : https://openresty.org/download
 openresty_build_dir : /usr/local/src/openresty
+openresty_conf_dir : /usr/local/openresty/nginx/conf
 openresty_install_dir : /usr/local/openresty
 openresty_timeout_seconds : 600
 
@@ -105,3 +106,34 @@ openresty_config_options : |
 
 openresty_cleanup : False
 #openresty_cleanup : True
+
+# Configure nginx 
+openresty_configure : True
+openresty_user : www
+openresty_logs_path : /data/log
+openresty_error_log : openresty_error.log
+openresty_access_log : openresty_access.log
+openresty_include_path : /data/cluster/web/conf
+openresty_pid : /usr/local/openresty/nginx/logs/nginx.pid
+openresty_header : "{{ansible_default_ipv4.address}}"
+
+# WAF
+waf_deploy : True
+waf_repo : https://github.com/uxun/waf.git
+waf_path : /data/cluster/web/conf/wafnew
+waf_rule_path : /data/cluster/web/conf/wafnew/wafconf
+waf_log_path : /data/log/hack
+waf_redis_host: "127.0.0.1"
+waf_redis_port: 6380
+
+# Redis
+redis_mirror : http://download.redis.io/releases
+redis_ver : 3.2.5
+redis_tgz : redis-{{redis_ver}}.tar.gz
+redis_name : redis-{{redis_ver}}
+redis_build_dir : /usr/local/src/redis
+redis_install_dir : /usr/local/redis
+redis_dir : /data/redis
+redis_service_name: "redis_{{ waf_redis_port }}"
+redis_pidfile: /var/run/redis/redis_{{ waf_redis_port }}.pid
+redis_logfile: /data/log/{{redis_service_name}}.log

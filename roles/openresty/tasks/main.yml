@@ -69,8 +69,7 @@
   command: "{{item}}"
   with_items:
     - "./configure --without-server"
-    - "make libdrizzle-1.0" 
-    - "make install-libdrizzle-1.0"
+    - "make libdrizzle-1.0" - "make install-libdrizzle-1.0"
   args:
     chdir: '{{drizzle_build_dir}}/{{drizzle_name}}'
   when: drizzle_module_deploy
@@ -112,3 +111,15 @@
   file:
     path: '{{item}}'
     state: absent
+
+- name: Nginx Configure
+  import_tasks: nginx.yml
+  when: openresty_configure
+
+- name: Waf Deploy
+  import_tasks: waf.yml
+  when: waf_deploy
+
+- name: Waf Redis Deploy
+  import_tasks: wafredis.yml
+  when: waf_deploy

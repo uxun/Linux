@@ -1,0 +1,88 @@
+- name: Create redis build dirs
+  become: yes
+  become_user: root
+  file: 
+    path: "{{redis_build_dir}}"
+    state: directory
+    mode: "0755"
+
+- name: Download redis package
+  get_url:
+    url: "{{redis_mirror}}/{{redis_tgz}}"
+    dest: /tmp
+
+- name: Unarchive redis
+  become: yes
+  become_user: root
+  unarchive:
+    remote_src: yes
+    src: /tmp/{{redis_tgz}}
+    dest: "{{redis_build_dir}}"
+    creates: "{{redis_build_dir}}/{{redis_name}}"
+
+- name: enable overcommit in sysctl
+  sysctl:
+    name: vm.overcommit_memory
+    value: "1"
+    state: present
+    reload: yes
+    ignoreerrors: yes
+  when: redis_travis_ci is not defined
+  
+- name: compile redis
+  shell: umask 0022 && make -j{{ ansible_processor_cores|default(1) + 1 }}
+  args:
+    chdir: "{{redis_build_dir}}/{{redis_name}}"
+
+- name: create redis install directory
+  file:
+    path: "{{ redis_install_dir }}"
+    state: directory
+    mode: 0755
+
+- name: create /etc/redis
+  file:
+    path: /etc/redis
+    state: directory
+    mode: 0755
+
+- name: create /var/run/redis
+  file:
+    path: /var/run/redis
+    state: directory
+
+- name: make install redis
+  shell: umask 0022 && make PREFIX={{ redis_install_dir }} install
+  args:
+    chdir: "{{redis_build_dir}}/{{redis_name}}"
+    creates: "{{ redis_install_dir }}/bin/redis-server"
+
+- name: create redis working directory
+  file:
+    path: "{{ redis_dir }}"
+    state: directory
+    recurse: yes
+
+- name: create redis init script
+  template:
+    src: redis.init.j2
+    dest: /etc/init.d/{{ redis_service_name }}
+    mode: 0755
+
+- name: create redis systemd service
+  template:
+    src: redis.service.j2
+    dest: /etc/systemd/system/{{ redis_service_name }}.service
+    mode: 0644
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version >= '7'
+
+- name: create redis config file
+  template:
+    src: redis.conf.default.j2
+    dest: /etc/redis/{{ waf_redis_port }}.conf
+
+- name: create redis data dir
+  file: 
+    path: "{{redis_dir}}/{{waf_redis_port}}"
+    state: directory
+    recurse: yes

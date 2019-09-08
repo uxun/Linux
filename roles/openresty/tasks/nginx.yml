@@ -1,0 +1,31 @@
+- name: Create nginx group
+  group:
+    name: "{{openresty_user}}"
+
+- name: Add nginx users
+  user:
+    name: "{{openresty_user}}"
+    shell: /sbin/nologin
+    group: "{{openresty_user}}"
+    create_home: no
+    state: present
+
+- name: mkdir dir
+  file:
+    path: "{{item}}"
+    state: directory
+    owner: "{{openresty_user}}"
+    group: "{{openresty_user}}"
+  with_items:
+    - "{{openresty_logs_path}}"
+    - "{{openresty_include_path}}"
+
+- name: Configuration nginx.conf
+  template: src=nginx.conf.j2 dest="{{openresty_conf_dir}}/nginx.conf"
+
+- name: Copy service to /etc/init.d
+  template: src=openresty.j2 dest=/etc/init.d/openresty mode=0755
+
+- name: Copy systemd to /run/systemd/generator.late
+  template: src=openresty.service.j2 dest=/run/systemd/generator.late/openresty.service mode=0644
+  when: ansible_distribution == 'CentOS' and ansible_distribution_version >= '7'
