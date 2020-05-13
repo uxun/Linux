@@ -1,0 +1,33 @@
+# example 1
+#[winserver]
+#192.168.1.11
+#
+#[winserver:vars]
+#ansible_user="administrator"
+#ansible_password="paswd"
+#ansible_ssh_port=5985
+#ansible_connection=winrm
+#ansible_winrm_server_cert_validation=ignore
+
+# example 2
+#[linux]
+#192.168.1.12
+#
+#[linux:vars]
+#ansible_ssh_user=root
+#ansible_ssh_port=2211
+
+#[webtest]
+#server1 ansible_ssh_host=192.168.109.1 ansible_ssh_port=2222
+#
+#[example]
+#[example:vars](默认值)
+#ansible_host 
+#ansible_port(22)
+#ansible_user(root)
+#ansible_password(None)
+#ansible_connection(smart)            # smart 智能传输，ssh不支持，切换Paramiko的pythonssh库
+#ansible_private_key_file(None)
+#ansible_shell_type(sh)               # 支持csh，fish，powershell，基本不用更改
+#ansible_python_interpreter(/usr/bin) # python解释器路径
+
