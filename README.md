@@ -1,4 +1,4 @@
-# Ansible-Playbook (AP)
+# Ansible-Playbook
 
 ### List
 1.openresty
