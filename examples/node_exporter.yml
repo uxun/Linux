@@ -1,0 +1,4 @@
+---
+- hosts: 192.168.1.111
+  roles:
+  - node_exporter
