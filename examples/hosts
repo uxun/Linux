@@ -17,6 +17,10 @@
 #ansible_ssh_user=root
 #ansible_ssh_port=2211
 
+# example 3
+#[ops]
+#192.168.1.13 ansible_ssh_user=root ansible_ssh_port=22 ansible_ssh_pass="PASSWD"
+
 #[webtest]
 #server1 ansible_ssh_host=192.168.109.1 ansible_ssh_port=2222
 #
