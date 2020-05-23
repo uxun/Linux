@@ -42,7 +42,7 @@ grafana_server:
 # Security
 grafana_security:
   admin_user: admin
-  admin_password: "lmbbench"
+  admin_password: ""
 #  secret_key: ""
 #  login_remember_days: 7
 #  cookie_username: grafana_user
@@ -63,6 +63,9 @@ grafana_database:
 #  max_idle_conn: 2
 #  max_open_conn: ""
 #  log_queries: ""
+
+# Remote cache
+grafana_remote_cache: {}
 
 # User management and registration
 grafana_welcome_email_on_sign_up: false
@@ -263,3 +266,8 @@ grafana_api_keys: []
 grafana_api_keys_dir: "{{ lookup('env', 'HOME') }}/grafana/keys"
 
 grafana_environment: {}
+
+# Panels configurations
+grafana_panels: {}
+#  disable_sanitize_html: false
+#  enable_alpha: false

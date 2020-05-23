@@ -6,13 +6,6 @@
       - grafana_database is mapping
       - grafana_security is mapping
 
-- name: Fail on unsupported system architectures
-  fail:
-    msg: "Sorry grafana doesn't support {{ ansible_architecture }} on this OS family ({{ ansible_os_family }}). Exiting."
-  when:
-    - ansible_architecture != "x86_64"
-    - not ( ansible_architecture in ['armv6l', 'armv7l'] and ansible_os_family == 'Debian' )
-
 - name: Fail when datasources aren't configured when dashboards are set to be installed
   fail:
     msg: "You need to specify datasources for dashboards!!!"
@@ -81,7 +74,7 @@
   fail:
     msg: Trying to use a port lower than 1024 without setting grafana_cap_net_bind_service.
   when:
-    - grafana_port <= 1024
+    - grafana_port | int <= 1024
     - not grafana_cap_net_bind_service
 
 - name: Fail if grafana_server.socket not defined when in socket mode
