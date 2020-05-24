@@ -5,8 +5,3 @@
     daemon_reload: true
     name: node_exporter
     state: restarted
-
-- name: restart service_node_exporter
-  service:
-    name: node_exporter
-    state: restarted
