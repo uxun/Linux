@@ -90,6 +90,15 @@ mysql_innodb_lock_wait_timeout: "50"
 mysql_innodb_large_prefix: "1"
 mysql_innodb_file_format: "barracuda"
 
+# mysql_other_configuration
+mysql_other_configuration: []
+#mysql_other_configuration: |-
+#  character_set_server=utf8mb4
+#  #mysql服务排序规则
+#  collation_server=utf8mb4_general_ci 
+#  #不区分大小写
+#  lower_case_table_names=1  
+
 # mysqldump settings.
 mysql_mysqldump_max_allowed_packet: "64M"
 
@@ -116,6 +125,11 @@ mysql_users: []
 #     host: 127.0.0.1
 #     password: secret
 #     priv: *.*:USAGE
+#mysql_users:
+#  - name: example_user
+#    host: "%"
+#    password: similarly-secure-password
+#    priv: "example_db.*:ALL"
 
 # Replication settings (replication is only enabled if master/user have values).
 mysql_server_id: "1"
