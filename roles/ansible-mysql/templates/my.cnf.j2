@@ -5,6 +5,13 @@
 port = {{ mysql_port }}
 socket = {{ mysql_socket }}
 
+[mysql]
+prompt="\u@host \R:\m:\s [\d]> "
+no-auto-rehash
+default-character-set = utf8
+# Remove the next comment character if you are not familiar with SQL
+#safe-updates
+
 [mysqld]
 port = {{ mysql_port }}
 bind-address = {{ mysql_bind_address }}
@@ -46,6 +53,8 @@ log-bin-index = mysql-bin.index
 expire_logs_days = {{ mysql_expire_logs_days }}
 max_binlog_size = {{ mysql_max_binlog_size }}
 binlog_format = {{mysql_binlog_format}}
+binlog_cache_size = {{ mysql_binlog_cache_size }}
+max_binlog_cache_size = {{ mysql_max_binlog_cache_size }}
 
 {% for db in mysql_databases %}
 {% if db.replicate|default(1) %}
@@ -87,6 +96,7 @@ query_cache_size = {{ mysql_query_cache_size }}
 query_cache_limit = {{ mysql_query_cache_limit }}
 {% endif %}
 max_connections = {{ mysql_max_connections }}
+max_connect_errors = {{ mysql_max_connect_errors }}
 tmp_table_size = {{ mysql_tmp_table_size }}
 max_heap_table_size = {{ mysql_max_heap_table_size }}
 group_concat_max_len = {{ mysql_group_concat_max_len }}
@@ -94,8 +104,15 @@ join_buffer_size = {{ mysql_join_buffer_size }}
 
 # Other settings.
 wait_timeout = {{ mysql_wait_timeout }}
+interactive_timeout = {{ mysql_interactive_timeout }}
 lower_case_table_names = {{ mysql_lower_case_table_names }}
 event_scheduler = {{ mysql_event_scheduler_state }}
+character_set_server = {{ mysql_character_set_server }}
+collation_server = {{ mysql_collation_server }}
+
+{% if mysql_other_configuration %}
+{{ mysql_other_configuration }}
+{% endif %}
 
 # InnoDB settings.
 {% if mysql_supports_innodb_large_prefix and '8.0.' not in mysql_cli_version.stdout %}
@@ -108,10 +125,6 @@ innodb_log_file_size = {{ mysql_innodb_log_file_size }}
 innodb_log_buffer_size = {{ mysql_innodb_log_buffer_size }}
 innodb_flush_log_at_trx_commit = {{ mysql_innodb_flush_log_at_trx_commit }}
 innodb_lock_wait_timeout = {{ mysql_innodb_lock_wait_timeout }}
-
-{% if mysql_other_configuration %}
-{{ mysql_other_configuration }}
-{% endif %}
 
 [mysqldump]
 quick

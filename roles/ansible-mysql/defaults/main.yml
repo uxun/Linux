@@ -29,7 +29,7 @@ mysql_enablerepo: ""
 
 # Define a custom list of packages to install; if none provided, the default
 # package list from vars/[OS-family].yml will be used.
-mysql_packages:
+#mysql_packages:
 #   - mysql-community-server
 #   - mysql-server
 #   - MySQL-python
@@ -54,6 +54,25 @@ mysql_slow_query_time: "2"
 # mysql_slow_query_log_file: /var/log/mysql-slow.log
 
 # Memory settings (default values optimized ~512MB RAM).
+#mysql_key_buffer_size: "256M"
+#mysql_max_allowed_packet: "64M"
+#mysql_table_open_cache: "256"
+#mysql_sort_buffer_size: "1M"
+#mysql_read_buffer_size: "1M"
+#mysql_read_rnd_buffer_size: "4M"
+#mysql_myisam_sort_buffer_size: "64M"
+#mysql_thread_cache_size: "8"
+#mysql_query_cache_type: "0"
+#mysql_query_cache_size: "16M"
+#mysql_query_cache_limit: "1M"
+#mysql_max_connections: "151"
+#mysql_max_connect_errors: "100"
+#mysql_tmp_table_size: "16M"
+#mysql_max_heap_table_size: "16M"
+#mysql_group_concat_max_len: "1024"
+#mysql_join_buffer_size: "262144"
+# =====================================================
+
 mysql_key_buffer_size: "256M"
 mysql_max_allowed_packet: "64M"
 mysql_table_open_cache: "256"
@@ -66,15 +85,29 @@ mysql_query_cache_type: "0"
 mysql_query_cache_size: "16M"
 mysql_query_cache_limit: "1M"
 mysql_max_connections: "151"
-mysql_tmp_table_size: "16M"
-mysql_max_heap_table_size: "16M"
+mysql_max_connect_errors: "100"
+mysql_tmp_table_size: "32M"
+mysql_max_heap_table_size: "32M"
 mysql_group_concat_max_len: "1024"
 mysql_join_buffer_size: "262144"
 
 # Other settings.
-mysql_lower_case_table_names: "0"
+# case-insensitive (default.0)
+mysql_lower_case_table_names: "1"
 mysql_wait_timeout: "28800"
+mysql_interactive_timeout: "600"
 mysql_event_scheduler_state: "OFF"
+mysql_character_set_server: "utf8mb4"
+mysql_collation_server: "utf8mb4_general_ci"
+#mysql_other_configuration: []
+mysql_other_configuration: |-
+table_definition_cache = 1024
+table_open_cache_instances = 64
+gtid_mode = on
+enforce_gtid_consistency = 1
+relay_log_recovery = 1
+relay-log-purge = 1
+
 
 # InnoDB settings.
 mysql_innodb_file_per_table: "1"
@@ -89,15 +122,6 @@ mysql_innodb_lock_wait_timeout: "50"
 # These settings require MySQL > 5.5.
 mysql_innodb_large_prefix: "1"
 mysql_innodb_file_format: "barracuda"
-
-# mysql_other_configuration
-mysql_other_configuration: []
-#mysql_other_configuration: |-
-#  character_set_server=utf8mb4
-#  #mysql服务排序规则
-#  collation_server=utf8mb4_general_ci 
-#  #不区分大小写
-#  lower_case_table_names=1  
 
 # mysqldump settings.
 mysql_mysqldump_max_allowed_packet: "64M"
@@ -133,10 +157,13 @@ mysql_users: []
 
 # Replication settings (replication is only enabled if master/user have values).
 mysql_server_id: "1"
-mysql_max_binlog_size: "100M"
+# default 100M
+mysql_max_binlog_size: "1G"
 mysql_binlog_format: "ROW"
 mysql_expire_logs_days: "10"
 mysql_replication_role: ''
 mysql_replication_master: ''
+mysql_binlog_cache_size: "4096"
+mysql_max_binlog_cache_size: "2G"
 # Same keys as `mysql_users` above.
 mysql_replication_user: []
