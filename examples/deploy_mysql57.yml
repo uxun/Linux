@@ -18,7 +18,7 @@
     - name: Override variables for MySQL (RedHat).
       set_fact:
         mysql_daemon: mysqld
-        mysql_packages: ['mysql-community-server']
+        mysql_packages: ['mysql-community-server','MySQL-python','perl-DBD-MySQL']
         mysql_log_error: /var/log/mysqld.err
         mysql_syslog_tag: mysqld
         mysql_pid_file: /var/run/mysqld/mysqld.pid
