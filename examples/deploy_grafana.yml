@@ -1,4 +1,4 @@
 ---
 - hosts: one
   roles:
-  - grafana
+  - ansible-grafana

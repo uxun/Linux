@@ -14,8 +14,10 @@
 #192.168.1.12
 #
 #[linux:vars]
-#ansible_ssh_user=root
+#ansible_ssh_user=User
 #ansible_ssh_port=2211
+#ansible_become=yes
+
 
 # example 3
 #[ops]
