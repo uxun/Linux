@@ -1,0 +1,3 @@
+#top_process
+UserParameter=discovery.process,{{ zabbix_agent_userparameters_scripts_src_path }}/process/discovery_process.sh
+UserParameter=process.check[*],{{ zabbix_agent_userparameters_scripts_src_path }}/process/process_check.sh $1 $2 $3

@@ -1,0 +1,265 @@
+---
+# defaults file for zabbix-agent
+
+zabbix_agent_version: 4.0.21  #set
+zabbix_version: "{{ zabbix_agent_version }}"
+zabbix_version_patch: 0
+zabbix_repo: zabbix
+zabbix_agent_package: zabbix-agent
+zabbix_sender_package: zabbix-sender
+zabbix_get_package: zabbix-get
+zabbix_agent_package_state: present
+# zabbix-server or zabbix-proxy ip
+zabbix_agent_server: 192.168.100.11 #set
+zabbix_agent_serveractive: 192.168.100.11 #set
+zabbix_selinux: False
+
+# Debian
+zabbix_agent_src_reinstall: True
+# Pin-Priority 
+zabbix_agent_apt_priority:
+
+# Selinux related vars 
+selinux_allow_zabbix_run_sudo: False
+
+zabbix_agent_packages:
+  - zabbix-agent
+  - zabbix-sender
+  - zabbix-get
+
+# Zabbix role related vars
+zabbix_install_pip_packages: true
+zabbix_apt_force_apt_get: yes
+zabbix_apt_install_recommends: no
+
+# Override Ansible specific facts
+zabbix_agent_distribution_major_version: "{{ ansible_distribution_major_version }}"
+zabbix_agent_distribution_release: "{{ ansible_distribution_release }}"
+zabbix_agent_os_family: "{{ ansible_os_family }}"
+
+zabbix_repo_yum:
+  - name: zabbix
+    description: Zabbix Official Repository - $basearch
+    #baseurl: http://repo.zabbix.com/zabbix/{{ zabbix_version }}/rhel/{{ zabbix_agent_distribution_major_version }}/$basearch/
+    baseurl: https://mirrors.aliyun.com/zabbix/zabbix/{{ zabbix_version }}/rhel/{{ zabbix_agent_distribution_major_version }}/$basearch/
+    priority: 1
+    gpgcheck: 0
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-ZABBIX
+    state: present
+  - name: zabbix-non-supported
+    description: Zabbix Official Repository non-supported - $basearch
+    #baseurl: http://repo.zabbix.com/non-supported/rhel/{{ zabbix_agent_distribution_major_version }}/$basearch/
+    baseurl: https://mirrors.aliyun.com/zabbix/non-supported/rhel/{{ zabbix_agent_distribution_major_version }}/$basearch/
+    priority: 1
+    gpgcheck: 0
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-ZABBIX
+    state: present
+
+# Zabbix API stuff
+zabbix_agent_server_url: "http://192.168.100.11/zabbix" #set
+zabbix_url: "{{ zabbix_agent_server_url }}"
+# 基本身份验证访问zabbix网址的http用户
+# zabbix_api_http_user: admin
+# zabbix_api_http_password: admin
+zabbix_api_user: Admin  #set
+zabbix_api_pass: zabbix  #set
+# 启用Zabbix API创建/删除主机或者主机组时，api_create_host* 为True
+zabbix_api_create_hostgroup: True
+zabbix_api_create_hosts: True
+# zabbix_api_create_hostgroup = True ,present 创建主机组，absent 删除主机组
+zabbix_create_hostgroup: present  # or absent
+zabbix_create_host: present       # or absent
+# zabbix_api_create_hosts = True ,更新已有主机
+zabbix_update_host: yes
+zabbix_host_status: enabled       # or disabled
+zabbix_proxy: null
+# 配置Zabbix库存模式,automatic 为自动生成库存数据。
+zabbix_inventory_mode: disabled
+# 1:ip, 0:fqdn
+zabbix_useuip: 1
+# 此主机所属的主机组列表。
+zabbix_host_groups: #set
+  - Linux servers
+zabbix_link_templates: #set
+#  - Template OS Linux by Zabbix agent
+  - Template Linux System Base
+  - Template_Linux_Process_Top
+
+# 配置了通过API配置时可以使用的接口的列表
+zabbix_agent_interfaces:
+  - type: 1
+    main: 1
+    useip: "{{ zabbix_useuip }}"
+    ip: "{{ zabbix_agent_ip }}"
+    dns: "{{ ansible_fqdn }}"
+    port: "{{ zabbix_agent_listenport }}"
+
+# 如果IPtables需要通过为.NET中配置的端口打开TCP端口来更新
+zabbix_agent_firewall_enable: False
+# 如果firewalld需要通过打开端口中配置的TCP端口进行更新zabbix_agent_listenport和zabbix_agent_jmx_listenport如果所定义
+zabbix_agent_firewalld_enable: False
+# iptables配置为仅允许来自该IP地址/范围的流量
+zabbix_agent_firewalld_source: "{{ zabbix_agent_server }}"
+zabbix_agent_firewall_action: insert
+zabbix_agent_firewall_chain: INPUT
+
+# By default, a null zone will trigger the use of the default zone on the remote host
+zabbix_agent_firewalld_zone:
+# Zabbix configuration variables
+zabbix_agent_pidfile: /var/run/zabbix/zabbix_agentd.pid #set
+zabbix_agent_logfile: /var/log/zabbix/zabbix_agentd.log #set
+zabbix_agent_logfilesize: 100
+zabbix_agent_debuglevel: 3
+zabbix_agent_sourceip:
+zabbix_agent_enableremotecommands: 0
+zabbix_agent_logremotecommands: 0
+zabbix_agent_listenport: 10050 #set
+zabbix_agent_jmx_listenport:
+zabbix_agent_listeninterface:
+zabbix_agent_listenip:
+zabbix_agent_startagents: 3
+zabbix_agent_hostname: "{{ inventory_hostname }}"
+zabbix_agent_hostnameitem:
+zabbix_agent_hostmetadata:
+zabbix_agent_hostmetadataitem:
+zabbix_agent_refreshactivechecks: 120
+zabbix_agent_buffersend: 5
+zabbix_agent_buffersize: 100
+zabbix_agent_maxlinespersecond: 100
+# 允许代理以“ root”身份运行。0-不允许，1-允许
+zabbix_agent_allowroot: 0
+zabbix_agent_zabbix_alias:
+zabbix_agent_timeout: 3
+zabbix_agent_include: /etc/zabbix/zabbix_agentd.d
+zabbix_agent_unsafeuserparameters: 0
+# 用户参数名称和脚本（如果有）的列表
+#zabbix_agent_userparameters: []
+zabbix_agent_userparameters: #set
+  - name: disk
+    scripts_dir: disk
+  - name: memory
+    scripts_dir: memory
+  - name: network_connect
+  - name: process
+    scripts_dir: process
+  - name: redis
+    scripts_dir: redis
+  - name: memcached
+    scripts_dir: memcached 
+  - name: mysql
+zabbix_agent_userparameters_templates_src: "userparameters"
+zabbix_agent_userparameters_scripts_src: "scripts"
+zabbix_agent_userparameters_scripts_src_path: "/etc/zabbix/zabbix_agentd.d/scripts"
+zabbix_agent_custom_scripts: false
+#zabbix_agent_custom_scripts: true
+zabbix_agent_loadmodulepath: ${libdir}/modules
+zabbix_agent_loadmodule:
+zabbix_agent_become_on_localhost: True
+# Zabbix中主机的描述
+zabbix_agent_description:
+# 为zabbix库存添加事实
+zabbix_agent_inventory_zabbix: {}
+
+# TLS settings
+# 代理应如何连接到服务器或代理。用于主动检查 (unencrypted | psk | )
+zabbix_agent_tlsconnect:
+# 接受哪些传入连接
+zabbix_agent_tlsaccept:
+# 包含用于对等证书验证的顶级CA证书的文件的完整路径名
+zabbix_agent_tlscafile:
+# 包含已撤销证书的文件的完整路径名
+zabbix_agent_tlscrlfile:
+# 允许的服务器证书颁发者
+zabbix_agent_tlsservercertissuer:
+# 允许的服务器证书主题
+zabbix_agent_tlsservercertsubject:
+#包含代理证书或证书链的文件的完整路径名
+zabbix_agent_tlscertfile:
+#包含代理私钥的文件的完整路径名。
+zabbix_agent_tlskeyfile:
+#唯一的，区分大小写的字符串，用于标识预共享密钥。
+zabbix_agent_tlspskidentity:
+# 允许在客户端上自动生成和存储各个预共享密钥和身份
+zabbix_agent_tlspsk_auto: False
+
+zabbix_agent_tls_config:
+  unencrypted: '1'
+  psk: '2'
+  cert: '4'
+
+# IPMI settings
+zabbix_agent_ipmi_authtype: 2
+zabbix_agent_ipmi_password:
+zabbix_agent_ipmi_privilege: 2
+zabbix_agent_ipmi_username:
+
+# Windows/macOS Related
+zabbix_version_long: 4.4.4
+
+# Windows Related
+zabbix_win_package: zabbix_agent-{{ zabbix_version_long }}-windows-i386.zip
+zabbix_win_download_url: https://www.zabbix.com/downloads
+zabbix_win_download_link: "{{ zabbix_win_download_url }}/{{ zabbix_version_long }}/{{ zabbix_win_package }}"
+zabbix_win_install_dir: 'C:\Zabbix'
+zabbix_agent_win_logfile: 'C:\Zabbix\zabbix_agentd.log'
+zabbix_agent_win_include: 'C:\Zabbix\zabbix_agent.d\'
+zabbix_agent_win_svc_recovery: True
+
+# macOS Related
+zabbix_mac_package: zabbix_agent-{{ zabbix_version_long }}-macos-amd64-openssl.pkg
+zabbix_mac_download_url: https://www.zabbix.com/downloads
+zabbix_mac_download_link: "{{ zabbix_mac_download_url }}/{{ zabbix_version_long }}/{{ zabbix_mac_package }}"
+
+# Zabbix Agent Docker facts
+zabbix_agent_docker: False
+zabbix_agent_docker_state: started
+zabbix_agent_docker_name: zabbix-agent
+zabbix_agent_docker_image: "zabbix/zabbix-agent"
+zabbix_agent_docker_image_tag: "ubuntu-{{ zabbix_version }}.{{ zabbix_version_patch }}"
+zabbix_agent_docker_user_gid: 101
+zabbix_agent_docker_user_uid: 101
+zabbix_agent_docker_network_mode: host
+zabbix_agent_docker_restart_policy: unless-stopped
+zabbix_agent_docker_privileged: False
+zabbix_agent_docker_ports:
+  - 10050:10050
+zabbix_agent_docker_security_opts:
+  - apparmor:unconfined
+zabbix_agent_docker_volumes:
+  - /etc/zabbix/zabbix_agentd.d:{{ zabbix_agent_include }}
+  - /:/hostfs:ro
+  - /etc:/hostfs/etc:ro
+  - /proc:/hostfs/proc:ro
+  - /sys:/hostfs/sys:ro
+  - /var/run:/var/run
+zabbix_agent_docker_env:
+  ZBX_HOSTNAME: "{{ zabbix_agent_hostname }}"
+  ZBX_SERVER_HOST: "{{ zabbix_agent_server }}"
+  ZBX_PASSIVE_ALLOW: "{{ zabbix_agent_serverpassive_allow | default(omit) }}"
+  ZBX_PASSIVESERVERS: "{{ zabbix_agent_serverpassive | default(omit) }}"
+  ZBX_ACTIVE_ALLOW: "{{ zabbix_agent_serveractive_allow | default(omit) }}"
+  ZBX_LOADMODULE: "{{ zabbix_agent_loadmodule | default(omit) }}"
+  ZBX_DEBUGLEVEL: '{{ zabbix_agent_debuglevel }}'
+  ZBX_TIMEOUT: '{{ zabbix_agent_timeout }}'
+  ZBX_SOURCEIP: "{{ zabbix_agent_sourceip | default(omit) }}"
+  ZBX_ENABLEREMOTECOMMANDS: "{{ zabbix_agent_enableremotecommands | default(omit) }}"
+  ZBX_LOGREMOTECOMMANDS: "{{ zabbix_agent_logremotecommands | default(omit) }}"
+  ZBX_STARTAGENTS: "{{ zabbix_agent_startagents | default(omit) }}"
+  ZBX_HOSTNAMEITEM: "{{ zabbix_agent_hostnameitem | default(omit) }}"
+  ZBX_METADATA: "{{ zabbix_agent_hostmetadata | default(omit) }}"
+  ZBX_METADATAITEM: "{{ zabbix_agent_hostmetadataitem | default(omit) }}"
+  ZBX_REFRESHACTIVECHECKS: "{{ zabbix_agent_refreshactivechecks | default(omit) }}"
+  ZBX_BUFFERSEND: "{{ zabbix_agent_buffersend | default(omit) }}"
+  ZBX_BUFFERSIZE: "{{ zabbix_agent_buffersize | default(omit) }}"
+  ZBX_MAXLINESPERSECOND: "{{ zabbix_agent_maxlinespersecond | default(omit) }}"
+  ZBX_LISTENIP: "{{ zabbix_agent_listenip }}"
+  ZBX_UNSAFEUSERPARAMETERS: "{{ zabbix_agent_unsafeuserparameters | default(omit) }}"
+  ZBX_TLSCONNECT: "{{ zabbix_agent_tlsconnect | default(omit) }}"
+  ZBX_TLSACCEPT: "{{ zabbix_agent_tlsaccept | default(omit) }}"
+  ZBX_TLSCAFILE: "{{ zabbix_agent_tlscafile | default(omit) }}"
+  ZBX_TLSCRLFILE: "{{ zabbix_agent_tlscrlfile | default(omit) }}"
+  ZBX_TLSSERVERCERTISSUER: "{{ zabbix_agent_tlsservercertissuer | default(omit) }}"
+  ZBX_TLSSERVERCERTSUBJECT: "{{ zabbix_agent_tlsservercertsubject | default(omit) }}"
+  ZBX_TLSCERTFILE: "{{ zabbix_agent_tlscertfile | default(omit) }}"
+  ZBX_TLSKEYFILE: "{{ zabbix_agent_tlskeyfile | default(omit) }}"
+  ZBX_TLSPSKIDENTITY: "{{ zabbix_agent_tlspskidentity | default(omit) }}"

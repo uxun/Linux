@@ -1,0 +1,4 @@
+#UserParameter=disk.status[*],/etc/zabbix/zabbix_agentd.d/scripts/disk_status.sh $1 $2
+#UserParameter=disk.discovery[*],/etc/zabbix/zabbix_agentd.d/scripts/disk_discovery.sh
+UserParameter=disk.status[*],{{ zabbix_agent_userparameters_scripts_src_path }}/disk/disk_status.sh $1 $2
+UserParameter=disk.discovery[*],{{ zabbix_agent_userparameters_scripts_src_path }}/disk/disk_discovery.sh

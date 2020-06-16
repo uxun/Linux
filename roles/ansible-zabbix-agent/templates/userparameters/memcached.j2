@@ -1,0 +1,2 @@
+UserParameter=memcached.discovery[*],python {{ zabbix_agent_userparameters_scripts_src_path }}/memcached/memcached_discovery.py
+UserParameter=memcached[*],/bin/bash {{ zabbix_agent_userparameters_scripts_src_path }}/memcached/memcached_status.sh $1 $2
