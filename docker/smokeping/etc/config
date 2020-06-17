@@ -1,0 +1,218 @@
+*** General ***
+# Mail
+owner    = Uxun
+# The administrator email
+contact  = server@uxun.com
+# smtp server
+mailhost = smtp.xxxx.com
+sendmail = /usr/sbin/sendmail
+
+# Working directory
+imgcache = /opt/smokeping/htdocs/cache
+imgurl  = cache
+datadir = /opt/smokeping/data
+piddir = /opt/smokeping/var
+# web url 
+cgiurl  = http://192.168.0.24:8888/smokeping/smokeping.fcgi
+smokemail = /opt/smokeping/etc/smokemail.dist
+tmail = /opt/smokeping/etc/tmail.dist
+
+# Syslog日志配置
+syslogfacility = none
+# each probe is now run in its own process
+# disable this to revert to the old behaviour
+# concurrentprobes = no
+
+*** Alerts ***
+# 报警配置
+#to = user@some.com
+to = |/opt/smokeping/bin/mailx_alert.sh
+from = server@.com
+
++someloss
+type = loss
+# in percent
+#pattern = >0%,*12*,>0%,*12*,>0%
+edgetrigger = yes
+pattern = ==0%,==0%,==0%,==0%,>50%,>50%,>50%
+#pattern = ==0%,==0%,==0%,==0%,>0%
+comment = loss 3 times  in a row
+
++rttdetect
+type = rtt
+# in milli seconds
+edgetrigger = yes
+pattern = <100,<100,<100,<100,<100,<150,>150,>150,>150
+comment = 连续3次采样延迟增大-超过150ms
+
+*** Database ***
+
+# 60s 监控一次
+step     = 60
+# 60s 内ping 多少次
+pings    = 20
+
+# consfn mrhb steps total
+
+AVERAGE  0.5   1  1008
+AVERAGE  0.5  12  4320
+    MIN  0.5  12  4320
+    MAX  0.5  12  4320
+AVERAGE  0.5 144   720
+    MAX  0.5 144   720
+    MIN  0.5 144   720
+
+*** Presentation ***
+# 预设配置
+
+# 页面模板路径
+template = /opt/smokeping/etc/basepage.html.dist
+charset = utf-8
+
++ charts
+
+menu = 统计排行
+title = 延迟排行统计
+
+++ stddev
+sorter = StdDev(entries=>4)
+title = 标准偏差排行
+menu = 标准偏差
+format = 标准偏差 %f
+
+++ max
+sorter = Max(entries=>5)
+title = 最大往返时间排行
+menu = 最大往返时间
+format = 最大往返时间 %f 秒
+
+++ loss
+sorter = Loss(entries=>5)
+title = 最大丢包排行
+menu = 丢包率
+format = 丢包率 %f
+
+++ median
+sorter = Median(entries=>5)
+title = 平均中间数排行
+menu = 平均中间数
+format = 中间数 %f 秒
+
++ overview 
+
+width = 600
+height = 60
+range = 10h
+
++ detail
+
+width = 600
+height = 200
+unison_tolerance = 2
+
+"最近1小时"    1h
+"最近24小时"   24h
+"最近7天"      7d
+"最近30天"     10d
+"最近400天"    400d
+
+#+ hierarchies
+#++ owner
+#title = Host Owner
+#++ location
+#title = Location
+
+*** Probes ***
+# 定义探测方式
++ FPing
+binary = /usr/sbin/fping
+
+
+*** Targets ***
+# 目标探测类型
+probe = FPing
+
+menu = Top
+title = 网络延迟图形统计
+remark = 欢迎使用SmokePing 网络延迟统计. \
+         选择左边的菜单可以查看详细信息.
+
+# 告警类型
+#alerts = someloss
+alerts = someloss,rttdetect
+
+# 一级菜单
++ UXUN
+menu = 公司
+title = 节点
+
+# 二级菜单
+++ FS
+menu = 佛山节点
+title = 佛山服务器
+#host =
+
+# 三级菜单 
++++ TEL2MOB
+menu = 电信到移动 
+title = 电信到移动节点概况
+
+# # 三级子菜单 
+++++ TO_FS_FIREWALLD_MOB1
+menu = 到佛山防火墙移动1
+title = 佛山防火墙移动 114.114.114.114
+host = 114.114.114.114
+
+++++ TO_FS_FIREWALLD_MOB2
+menu = 到佛山防火墙移动2
+title = 佛山防火墙移动 8.8.8.8
+host = 8.8.8.8
+
+
+++++ Mulit
+menu = 电信到移动汇总
+title = 佛山电信到各地移动延迟汇总
+host = /UXUN/FS/TEL2MOB/TO_FS_FIREWALLD_MOB1 /UXUN/FS/TEL2MOB/TO_FS_FIREWALLD_MOB2
+
+
+# 三级菜单
++++ TEL2TEL
+menu = 电信到电信
+title = 电信到电信节点概况
+
+# 三级子菜单
+
+++++ Mulit
+menu = 电信对电信汇总
+title = 佛山电信对各地电信延迟汇总
+host = /UXUN/FS/TEL2TEL/TO_HZ_TEL1 /UXUN/FS/TEL2TEL/TO_HZ_TEL2 /UXUN/FS/TEL2TEL/TO_HZ_TEL3 /UXUN/FS/TEL2TEL/TO_SH_TEL1 /UXUN/FS/TEL2TEL/TO_SH_TEL2 /UXUN/FS/TEL2TEL/TO_SH_TEL3 /UXUN/FS/TEL2TEL/TO_CD_TEL1 /UXUN/FS/TEL2TEL/TO_CD_TEL2 /UXUN/FS/TEL2TEL/TO_CD_TEL3 /UXUN/FS/TEL2TEL/TO_HNLY_BGP1 /UXUN/FS/TEL2TEL/TO_HNLY_BGP2 /UXUN/FS/TEL2TEL/TO_HNLY_BGP3 /UXUN/FS/TEL2TEL/TO_BJ_BGP1 /UXUN/FS/TEL2TEL/TO_BJ_BGP2 /UXUN/FS/TEL2TEL/TO_BJ_BGP3 /UXUN/FS/TEL2TEL/TO_HRB_TEL1 /UXUN/FS/TEL2TEL/TO_HRB_TEL2 /UXUN/FS/TEL2TEL/TO_HRB_TEL3 /UXUN/FS/TEL2TEL/TO_ZS_BGP /UXUN/FS/TEL2TEL/TO_ZS_DFS_BACKEND /UXUN/FS/TEL2TEL/TO_FS_BGP /UXUN/FS/TEL2TEL/TO_ZH_DXTD /UXUN/FS/TEL2TEL/TO_XG_QQ_COM
+
+# 三级菜单
++++ TEL2UNI
+menu = 电信到联通
+title = 电信到联通概况
+
+# 三级子菜单
+++++ TO_FS_FIREWALLD_UNI1
+menu = 到佛山防火墙联通2
+title = 佛山防火墙联通 1.1.1.1
+host = 1.1.1.1
+
+++++ Mulit
+menu = 电信到联通汇总
+title = 佛山电信到各地联通延迟汇总
+host = /UXUN/FS/TEL2UNI/TO_HZ_UNI1 /UXUN/FS/TEL2UNI/TO_HZ_UNI2 /UXUN/FS/TEL2UNI/TO_SH_UNI1 /UXUN/FS/TEL2UNI/TO_SH_UNI2 /UXUN/FS/TEL2UNI/TO_CD_UNI1 /UXUN/FS/TEL2UNI/TO_CD_UNI2 /UXUN/FS/TEL2UNI/TO_HRB_UNI1 /UXUN/FS/TEL2UNI/TO_HRB_UNI2
+
+*** Slaves ***
+# 定义Slave 配置
+
+# Slave 模板
+secrets=/opt/smokeping/etc/smokeping_secrets.dist
+
++ GZ_SERVERS
+display_name = guangzhou
+color = ff0000
+
++ HZ_SERVERS
+display_name = hangzhou
+color = ff0000
