@@ -1,0 +1,66 @@
+---
+- hosts: es1
+  roles:
+    - role: ansible-elasticsearch
+  vars:
+    es_heap_size: "2g"
+    es_data_dirs:
+      - "/data/elasticsearch"
+    es_log_dir: "/var/log/elasticsearch"
+    es_config:
+      cluster.name: "es-cluster"
+      node.name: "es1"
+      cluster.initial_master_nodes: ["es1", "es2", "es3"]
+      discovery.seed_hosts: ["es1:9300", "es2", "es3"]
+      network.host: "{{ ansible_default_ipv4.address }}"
+      http.port: 9200
+      node.data: true
+      node.master: true
+      bootstrap.memory_lock: true
+    es_start_service: false
+    es_plugins:
+     - plugin: ingest-attachment
+
+- hosts: es2
+  roles:
+    - role: ansible-elasticsearch
+  vars:
+    es_heap_size: "2g"
+    es_data_dirs:
+      - "/data/elasticsearch"
+    es_log_dir: "/var/log/elasticsearch"
+    es_config:
+      cluster.name: "es-cluster"
+      node.name: "es2"
+      cluster.initial_master_nodes: ["es1", "es2", "es3"]
+      discovery.seed_hosts: ["es1:9300", "es2", "es3"]
+      network.host: "{{ansible_default_ipv4.address}}"
+      http.port: 9200
+      node.data: true
+      node.master: true
+      bootstrap.memory_lock: true
+    es_start_service: false
+    es_plugins:
+      - plugin: ingest-attachment
+
+- hosts: es3
+  roles:
+    - role: ansible-elasticsearch
+  vars:
+    es_heap_size: "2g"
+    es_data_dirs:
+      - "/data/elasticsearch"
+    es_log_dir: "/var/log/elasticsearch"
+    es_config:
+      cluster.name: "es-cluster"
+      node.name: "es3"
+      cluster.initial_master_nodes: ["es1", "es2", "es3"]
+      discovery.seed_hosts: ["es1:9300", "es2", "es3"]
+      network.host: "{{ansible_default_ipv4.address}}"
+      http.port: 9200
+      node.data: true
+      node.master: true
+      bootstrap.memory_lock: true
+    es_start_service: false
+    es_plugins:
+      - plugin: ingest-attachment

@@ -3,7 +3,6 @@
 #=======Centos{6|7}=======#
 #==System initialization==#
 #=========Uxun============#
-# 改天整理
 
 #===disable unwanted services ===#
 grep -q '7.' /etc/redhat-release
