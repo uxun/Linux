@@ -2,10 +2,10 @@
 .idea
 .molecule
 .cache
-__pycache__
 *.retry
 .pytest_cache
 .env
 .virtualenv
-*.pyc
 requirements.txt
+*/__pycache__
+*.pyc
