@@ -1,0 +1,20 @@
+---
+- name: Include tasks for specific OS
+  include: '{{ ansible_system }}/{{ ansible_os_family }}.yml'
+
+- name: Straight to getenforce selinux status
+  include: '{{ ansible_system }}/selinux.yml'
+
+- name: Include Prometheus exporter tasks
+  include: '{{ ansible_system }}/{{ os_linux_exporter_type_item.name | lower }}.yml'
+  loop: '{{ os_linux_exporter_type }}'
+  loop_control:
+    loop_var: os_linux_exporter_type_item
+
+- name: Registered with HashiCorp Consul
+  include: '{{ ansible_system }}/register.yml'
+  loop: '{{ os_linux_exporter_type }}'
+  loop_control:
+    loop_var: os_linux_exporter_type_item
+  when:
+    - consul_public_register | bool

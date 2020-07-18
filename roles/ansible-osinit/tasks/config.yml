@@ -1,0 +1,224 @@
+---
+- name: Set machine timezone  start config.yml
+  timezone:
+    name: '{{ os_linux_tz }}'
+  when: os_linux_tz is defined
+
+- name: Set DNS
+  block:
+    - name: Gathering service facts
+      service_facts:
+      register: services_state
+    
+    - name: Ensure stop Network Manager from adding dns-servers
+      ini_file:
+        path: '/etc/NetworkManager/NetworkManager.conf'
+        state: 'present'
+        no_extra_spaces: 'yes'
+        section: 'main'
+        option: 'dns'
+        value: 'none'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+        backup: 'yes'
+    
+    - name: Reload Network Manager service
+      systemd:
+        name: 'NetworkManager.service'
+        state: 'restarted'
+      when:
+        - services_state.ansible_facts.services["NetworkManager.service"] is defined
+        - services_state.ansible_facts.services["NetworkManager.service"].state == 'running'
+    
+    - name: Resolver configuration file transfer
+      template:
+        src: 'resolv.conf.j2'
+        dest: '/etc/resolv.conf'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+  when: os_dns_server is defined
+
+- name: Configure runtime kernel parameters
+  block:
+    - name: Copy sysctl.conf to Dir
+      template:
+        src: '10-sysctl.conf.j2'
+        dest: '/etc/sysctl.d/10-sysctl.conf'
+        backup: 'yes'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+    
+    - name: Performs runtime kernel parameters
+      command: 'sysctl -p /etc/sysctl.d/10-sysctl.conf'
+      changed_when: false
+      failed_when: false
+  when: os_linux_sysctl | bool
+
+- name: Set nofile limits
+  lineinfile:
+    dest: /etc/security/limits.conf
+    state: 'present'
+    line: '{{ item }}'
+  with_items:
+    - '* soft nofile {{ os_linux_ulimit_nofile }}'
+    - '* hard nofile {{ os_linux_ulimit_nofile }}'
+    - '* hard core 0'
+
+- name: Set nproc limits
+  lineinfile:
+    dest: /etc/security/limits.d/90-nproc.conf
+    insertafter: 'EOF'
+    state: 'present'
+    create: 'yes'
+    mode: '0644'
+    line: '{{ item }}'
+  with_items:
+    - '* soft nproc {{ os_linux_ulimit_nproc }}'
+    - '* hard nproc {{ os_linux_ulimit_nproc }}'
+      
+- name: Copies the key from the user who is running ansible to the remote machine
+  authorized_key:
+    user: '{{ ansible_user }}'
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  when: os_linux_id_rsa | bool
+
+- name: Set Dynamic motd
+  block:
+    - name: Set Dynamic motd Script
+      template:
+        src: 'motd.sh.j2'
+        dest: '/etc/profile.d/motd.sh'
+        owner: 'root'
+        group: 'root'
+        mode: '0755'
+  when: os_linux_motd | bool 
+
+- name: Ensure BASH log
+  lineinfile:
+    dest: '/etc/profile'
+    state: 'present'
+    line: '{{ item }}'
+  with_items:
+    - 'HISTSIZE={{ os_linux_shell_history }}'
+    - 'TMOUT={{ os_linux_shell_timeout }}'
+    - 'HISTTIMEFORMAT="%F %T "'
+    - PROMPT_COMMAND='history -a >(tee -a ~/.bash_history | logger -t "$USER ${SSH_CLIENT%% *} $PWD")'
+
+- name: Disable Vim tracking
+  lineinfile:
+    dest: '/etc/vimrc'
+    state: 'present'
+    regexp: '^set viminfo='
+    line: 'set viminfo=""'
+
+- name: Ensure sysstat file exists
+  stat: 
+    path: '/etc/cron.d/sysstat'
+  register: sysstat_file
+
+- name: Disable sysstat collect
+  file:
+    path: '/etc/cron.d/sysstat'
+    state: 'absent'
+  when:
+    - os_linux_disable_sysstat_collect | bool
+    - sysstat_file.stat.exists
+
+- name: Disable MTA IPv6 protocol
+  lineinfile:
+    state: 'present'
+    dest: '/etc/postfix/main.cf'
+    regexp: '^inet_protocols ='
+    line: 'inet_protocols = ipv4'
+  when: os_disable_ipv6 | bool
+
+- name: NTP system configuration
+  template:
+    src: 'ntp.conf.j2'
+    dest: '/etc/ntp.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  register: os_ntp_update
+  when: os_time_server is defined
+
+- name: Change HW Clock configuration
+  lineinfile:
+    state: 'present'
+    dest: '/etc/sysconfig/ntpdate'
+    regexp: '^SYNC_HWCLOCK'
+    line: 'SYNC_HWCLOCK=yes'
+
+- name: Reload NTP service
+  systemd:
+    name: 'ntpd.service'
+    enabled: 'yes'
+    state: 'restarted'
+  async: 1
+  poll: 0
+  when:
+    - os_ntp_update is changed
+    - ansible_distribution_major_version|int > 6
+
+- name: Reload NTP service
+  service :
+    name: 'ntpd'
+    enabled: 'yes'
+    state: 'restarted'
+  async: 1
+  poll: 0
+  when:
+    - os_ntp_update is changed
+    - ansible_distribution_major_version|int == 6
+
+- name: Configure MTA
+  lineinfile:
+    state: 'present'
+    dest: '/etc/postfix/main.cf'
+    regexp: '{{ item.regexp }}'
+    line: '{{ item.line }}'
+  with_items:
+    - { regexp: '^relayhost =', line: 'relayhost = {{ os_linux_MTA_relayhost }}' }
+  when: os_linux_MTA_relayhost is defined
+
+- name: Configure terminal scheme
+  lineinfile:
+    dest: '/etc/bashrc'
+    state: 'present'
+    line: '{{ item }}'
+  with_items:
+    - 'TMOUT={{ os_linux_shell_timeout }}'
+    - "IP=$(/sbin/ifconfig {{ ansible_default_ipv4.alias }}|awk '/inet / {print $2}'|cut -d ':' -f 2)"
+    - 'export PS1="[\[\033[01;31m\]\u\[\033[00m\]@\[\033[01;32m\]\h\[\033[00m\] \[\033[01;36m\]\$IP \[\033[01;33m\]\W\[\033[00m\]]\[\033[00;34m\]\\$\[\033[00m\] "'
+
+- name: Ensure network file exists
+  stat:
+    path: '/etc/sysconfig/network'
+  register: network_file
+
+- name: Set the network resolver single-request option
+  lineinfile:
+    dest: '/etc/sysconfig/network'
+    state: 'present'
+    line: 'RES_OPTIONS="options timeout:2 attempts:3 rotate single-request-reopen"'
+  when: 
+    - network_file.stat.exists
+    - os_linux_resolver_single_request | bool
+
+- name: Set service
+  include: 'service.yml'
+- name: Set syslog
+  include: 'rsyslog.yml'
+  when: syslog | bool
+
+- name: Ensure config status file
+  copy:
+    src: 'bootstrap_Config.Succeed'
+    dest: '/etc/bootstrap_Config.Succeed'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'

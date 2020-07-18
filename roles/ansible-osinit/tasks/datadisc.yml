@@ -1,0 +1,26 @@
+---
+- name: Logical Volume operation to start datadisc.yml
+  block:
+    - name: 'Create a volume group on /dev/{{ os_linux_disc_device }}'
+      lvg:
+        vg: '{{ os_linux_vg }}'
+        pvs: '/dev/{{ os_linux_disc_device }}'
+    - name: 'Create a logical volume the size of {{ os_linux_lv_size }} space in the volume group'
+      lvol:
+        vg: '{{ os_linux_vg }}'
+        lv: '{{ os_linux_lv }}'
+        size: '{{ os_linux_lv_size }}'
+    - name: 'Create a {{ os_linux_fstype | upper }} filesystem on logical volume'
+      filesystem:
+        fstype: '{{ os_linux_fstype }}'
+        dev: '/dev/{{ os_linux_vg }}/{{ os_linux_lv }}'
+    - name: Mount up device
+      mount:
+        name: '{{ os_linux_mount_point }}'
+        src: '/dev/{{ os_linux_vg }}/{{ os_linux_lv }}'
+        fstype: '{{ os_linux_fstype }}'
+        opts: '{{ os_linux_fsopts }}'
+        state: 'mounted'
+  when:
+    - ansible_devices[os_linux_disc_device].partitions | length == 0
+    - ansible_devices[os_linux_disc_device].links.ids | length == 0

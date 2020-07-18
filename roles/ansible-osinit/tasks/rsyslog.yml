@@ -1,0 +1,87 @@
+---
+- name: SysV init rsyslog to start config.yml 
+  block:
+    - name: Add rsyslog YUM repositories
+      yum_repository:
+        name: '{{ rsyslog_repo_name }}'
+        description: '{{ rsyslog_repo_name }} RPM repository for Enterprise Linux'
+        file: '{{ rsyslog_repo_name }}'
+        baseurl: '{{ rsyslog_repo_url }}'
+        gpgcheck: 'no'
+        timeout: '60'
+    
+    - name: Upgrade the rsyslog
+      yum:
+        name: '{{ rsyslog_packages }}' 
+        state: 'latest'
+      register: soft_update
+      until: soft_update is succeeded
+      retries: 3
+      delay: 5
+    
+    - name: Remote rsyslog Configuration
+      template:
+        src: 'rsyslog.conf.j2'
+        dest: '/etc/rsyslog.conf'
+        backup: 'yes'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+      register: conf_update
+    
+    - name: Reload rsyslog service
+      service:
+        name: 'rsyslog'
+        enabled: 'yes'
+        state: 'restarted'
+      async: 1
+      poll: 0
+      when:
+        - soft_update is changed
+        - conf_update is changed
+    
+    - name: Local syslog logrotate parameters
+      template:
+        src: 'logrotate.conf.j2'
+        dest: '/etc/logrotate.conf'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+  when: ansible_distribution_major_version|int == 6
+
+- name: Systemd rsyslog
+  block:
+    - name: Remote rsyslog Configuration
+      template:
+        src: 'rsyslog.conf.j2'
+        dest: '/etc/rsyslog.conf'
+        backup: 'yes'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+      register: conf_update
+    
+    - name: Ignore flooded logs with systemd messages
+      copy:
+        src: 'ignore-systemd-session-slice.conf'
+        dest: '/etc/rsyslog.d/ignore-systemd-session-slice.conf'
+    
+    - name: Reload rsyslog service
+      systemd:
+        name: 'rsyslog.service'
+        enabled: 'yes'
+        state: 'restarted'
+        daemon_reload: 'yes'
+      async: 1
+      poll: 0
+      when:
+        - conf_update is changed
+    
+    - name: Local syslog logrotate parameters
+      template:
+        src: 'logrotate.conf.j2'
+        dest: '/etc/logrotate.conf'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+  when: ansible_distribution_major_version|int == 7

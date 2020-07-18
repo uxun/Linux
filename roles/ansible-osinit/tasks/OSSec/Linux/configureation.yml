@@ -1,0 +1,40 @@
+---
+- name: Register OSSEC agent
+  shell: >
+    /var/ossec/bin/agent-auth
+    -A {{ inventory_hostname | upper }}
+    -m {{ ossec_agent_authd.address }}
+    -p {{ ossec_agent_authd.port }}
+    -P {{ ossec_agent_authd.authd_pass }}
+    {% if ossec_agent_authd.ssl_auto_negotiate == 'yes' %}-a{% endif %}
+  register: ossec_agent_auth_output
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- debug:
+    msg: '{{ ossec_agent_auth_output.stderr_lines[-1] }}'
+  when: ossec_agent_auth_output.rc != 0
+
+- name: Verify OSSEC agent registration
+  shell: 'echo {{ ossec_agent_auth_output }} | grep "Valid key created"'
+  when: ossec_agent_auth_output.rc == 0
+
+- name: OSSEC agent configuration file transfer
+  template:
+    src: 'ossec.conf.j2'
+    dest: '/var/ossec/etc/ossec.conf'
+    owner: 'root'
+    group: 'ossec'
+    mode: '0640'
+  when: ossec_agent_auth_output.rc == 0
+
+- name: OSSEC agent internal options configuration file transfer
+  template:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    owner: 'root'
+    group: 'ossec'
+    mode: '0640'
+  loop: '{{ ossec_internal_options }}'
+  when: ossec_agent_auth_output.rc == 0

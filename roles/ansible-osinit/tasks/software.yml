@@ -1,0 +1,50 @@
+---
+- name: 'Add EPEL YUM repositories'
+  yum_repository:
+    name: '{{ epel_repo_name }}'
+    description: '{{ epel_repo_name }} YUM repo'
+    file: '{{ epel_repo_name }}'
+    baseurl: '{{ epel_repo_url }}'
+    gpgcheck: 'no'
+    timeout: '60'
+
+- name: 'Configure YUM proxy'
+  lineinfile:
+    dest: '/etc/yum.conf'
+    line: 'proxy={{ os_proxy_server }}'
+  when: os_proxy_server is defined
+
+- name: 'Install the base packages'
+  yum:
+    name: '{{ ",".join(vars["base_packages_" + ansible_os_family + "_" + ansible_distribution_major_version]) }}'
+    state: 'present'
+    validate_certs: 'no'
+    disable_gpg_check: 'yes'
+    update_cache: 'yes'
+  register: yum_status
+  until: yum_status is succeeded
+  retries: 3
+  delay: 5
+
+- name: 'Remove the useless packages'
+  yum:
+    name: '{{ ",".join(vars["remove_packages_" + ansible_os_family + "_" + ansible_distribution_major_version]) }}'
+    state: 'absent'
+
+- name: 'Update all packages'
+  yum:
+    name: '*'
+    state: 'latest'
+    enablerepo: 'base,updates'
+  register: yum_status
+  until: yum_status is succeeded
+  retries: 3
+  delay: 5
+
+- name: Ensure update status file
+  copy:
+    src: 'bootstrap_Software.Succeed'
+    dest: '/etc/bootstrap_Software.Succeed'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'

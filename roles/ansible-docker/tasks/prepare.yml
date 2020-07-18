@@ -24,6 +24,9 @@
     src: "100-docker.conf.j2"
     dest: "/etc/sysctl.d/100-docker.conf"
 
+- name: Configuration to modprobe br_netfilter
+  shell: modprobe br_netfilter
+
 - name: Configuration to take effect (sysctl)
   shell: sysctl -p /etc/sysctl.d/100-docker.conf
 

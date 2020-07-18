@@ -1,0 +1,67 @@
+---
+- name: Include OS-specific variables
+  include_vars: '{{ ansible_os_family }}.yml'
+
+- name: OS initialization configuration operation
+  block:
+    - name: Check if Linux initialization configuration already processed
+      stat:
+        path: '/etc/bootstrap_Config.Succeed'
+      register: os_linux_config_result
+      when: ansible_system == 'Linux'
+    - name: Include Linux initialization configuration tasks
+      include: 'config.yml'
+      when:
+        - ansible_system == 'Linux'
+        - not os_linux_config_result.stat.exists | bool
+  when: os_config | bool
+  tags: config
+
+- name: Include data disc tasks for specific OS
+  include: 'datadisc.yml'
+  when: os_datadisc | bool
+  tags: datadisc
+
+- name: OS Harden operation
+  block:
+    - name: Check if Linux Harden already processed
+      stat:
+        path: '/etc/bootstrap_Harden.Succeed'
+      register: os_linux_harden_result
+      when: ansible_system == 'Linux'
+    - name: Include Linux Harden tasks
+      include: 'harden.yml'
+      when:
+        - ansible_system == 'Linux'
+        - not os_linux_harden_result.stat.exists | bool
+  when: os_harden | bool
+  tags: harden
+
+- name: OS software operation
+  block:
+    - name: Check if Linux software update already processed
+      stat:
+        path: '/etc/bootstrap_Software.Succeed'
+      register: os_linux_soft_result
+      when: ansible_system == 'Linux'
+    - name: Include Linux software tasks
+      include: 'software.yml'
+      when:
+        - ansible_system == 'Linux'
+        - not os_linux_soft_result.stat.exists | bool
+  when: os_software | bool
+  tags: software
+
+
+- name: Include Prometheus Exporter tasks for specific OS
+  include: 'Exporter/{{ ansible_system }}.yml'
+  when: os_exporter | bool
+  tags: exporter
+
+- name: Include OSSec tasks for specific OS
+  include: 'OSSec/{{ ansible_system }}.yml'
+  when:
+    - os_ossec | bool
+    - not ossec_is_install | bool or ossec_is_install is not defined
+  tags: ossec
+

@@ -1,0 +1,38 @@
+<ossec_config>
+  <client>
+    <server>
+      <address>{{ ossec_managers.address | list | random(seed=inventory_hostname) }}</address>
+      <port>{{ ossec_managers.port }}</port>
+      <protocol>{{ ossec_managers.protocol }}</protocol>
+    </server>
+{% if ossec_notify_time is not none and wazuh_time_reconnect is not none %}
+    <notify_time>{{ ossec_agent_config.notify_time }}</notify_time>
+    <time-reconnect>{{ ossec_agent_config.time_reconnect }}</time-reconnect>
+{% endif %}
+    <auto_restart>{{ ossec_agent_config.auto_restart }}</auto_restart>
+    <crypto_method>{{ ossec_agent_config.crypto_method }}</crypto_method>
+  </client>
+
+  <logging>
+    <log_format>{{ ossec_agent_config.log_format }}</log_format>
+  </logging>
+
+  <active-response>
+    <disabled>{{ ossec_agent_config.active_response.ar|default('no') }}</disabled>
+    <ca_store>{% if ansible_os_family == "Windows" %}{{ ossec_agent_config.active_response.ca_store_win }}{% else %}{{ ossec_agent_config.active_response.ca_store }}{% endif %}</ca_store>
+    <ca_verification>{{ ossec_agent_config.active_response.ca_verification }}</ca_verification>
+  </active-response>
+
+  <labels>
+    <label key="group">{{ group_names[-1] | upper }}</label>
+    <label key="environment">{{ environments | upper }}</label>
+    <label key="datacenter">{{ datacenter | lower }}</label>
+    <label key="domain">{{ domain | lower }}</label>
+{% if tags is defined %}
+{% for key,value in tags.iteritems() %}
+    <label key="{{ key }}">{{ value }}</label>
+{% endfor %}
+{% endif %}
+  </labels>
+
+</ossec_config>
