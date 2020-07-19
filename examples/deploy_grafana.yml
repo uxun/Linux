@@ -1,4 +1,7 @@
 ---
 - hosts: one
-  roles:
-  - ansible-grafana
+  roles: ansible-grafana
+  vars:
+    grafana_security:
+      admin_user: admin
+      admin_password: enter_your_secure_password
