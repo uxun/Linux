@@ -6,10 +6,6 @@ rsyslog_repo_name: 'rsyslog'
 rsyslog_repo_url: 'http://rpms.adiscon.com/v8-stable/epel-$releasever/$basearch'
 rsyslog_packages: 'rsyslog'
 
-node_repo_name: 'prometheus'
-node_repo_url: 'http://cache.omygods.com/prometheus-rpm/release/el/$releasever/$basearch'
-node_software: 'node_exporter'
-
 netdata_repo_name: 'netdata'
 netdata_repo_url: 'http://mirrors.tuna.tsinghua.edu.cn/epel/$releasever/$basearch/'
 netdata_software: 'netdata'

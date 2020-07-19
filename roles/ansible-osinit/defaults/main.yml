@@ -12,9 +12,6 @@ os_harden: true
 # 是否执行主机基本软件安装和更新。
 os_software: true                        
 
-# 是否部署普罗米修斯客户端。
-os_exporter: false 
-
 # 是否部署入侵检测客户端。
 os_ossec: false    
 
@@ -153,104 +150,6 @@ ossec_agent_config: # WAZUH代理参数。
     ca_verification: 'yes'
   log_format: 'plain'
 
-# 主机基本软件安装和更新参数 #
-# Linux 参数 #
-# /var/[specific OS].yml
-
-# Linux 普罗米修斯客户端参数 #
-os_linux_exporter_type: # Linux 普罗米修斯客户端类型
-  - name: 'node'
-    port: '9100'
-#  - name: 'netdata'
-#    port: '19999'
-#    database: 'ram'
-#    history: '300'
-#  - name: 'dellhw'
-#    port: '9137'
-netdata_collector: # NETDATA客户端系统收集器。
-  tc: 'no'
-  idlejitter: 'no'
-  cgroups: 'no'
-  checks: 'no'
-  apps: 'no'
-  chartsd: 'no'
-  noded: 'no'
-  pythond: 'no'
-node_exporter_collector: # 普罗米修斯客户端系统收集器。
-  - 'arp'
-  - 'bcache'
-  - 'bonding'
-  - 'conntrack'
-  - 'cpu'
-  - 'diskstats'
-  - 'entropy'
-  - 'filefd'
-  - 'filesystem'
-  - 'hwmon'
-  - 'infiniband'
-  - 'ipvs'
-  - 'loadavg'
-  - 'meminfo'
-  - 'netclass'
-  - 'netdev'
-  - 'netstat'
-  - 'nfs'
-  - 'nfsd'
-  - 'ntp'
-  - 'sockstat'
-  - 'stat'
-  - 'systemd'
-  - 'textfile'
-  - 'time'
-  - 'timex'
-  - 'uname'
-  - 'vmstat'
-#  - 'cpufreq'
-#  - 'buddyinfo'
-#  - 'drbd'
-#  - 'edac'
-#  - 'pressure'
-#  - 'interrupts'
-#  - 'ksmd'
-#  - 'logind'
-#  - 'mdadm'
-#  - 'meminfo_numa'
-#  - 'mountstats'
-#  - 'qdisc'
-#  - 'runit'
-#  - 'rapl'
-#  - 'supervisord'
-#  - 'schedstat'
-#  - 'tcpstat'
-#  - 'thermal_zone'
-#  - 'wifi'
-#  - 'xfs' # kernel 4.4+
-#  - 'zfs'
-node_exporter_systemd_collector: # 普罗米修斯客户端服务收集器。
-  - 'crond'
-  - 'orchestrator'
-  - 'ntpd'
-  - 'rsyslog'
-  - 'sshd'
-  - 'wazuh-agent'
-  - 'wazuh-api'
-  - 'wazuh-manager'
-node_exporter_ignored_mount_points_collector: # 普罗米修斯客户端收集器忽略的磁盘挂载点。
-  - 'data/docker/'
-  - 'dev'
-  - 'proc'
-  - 'rootfs'
-  - 'rpc_pipefs'
-  - 'run'
-  - 'run/docker/netns/'
-  - 'sys'
-  - 'var/lib/kubelet/'
-node_exporter_ignored_devices_collector: # 普罗米修斯客户端收集器忽略的块设备。
-  - 'ram'
-  - 'loop'
-  - 'fd'
-  - 'sr'
-
 # 公共领事配置参数 #
 environments: 'Development' # 定义系统环境。
 datacenter: 'dc01' # 定义数据中心。
@@ -264,7 +163,6 @@ domain: 'local' # 定义域信息。
 #  department: 'Infrastructure'
 #  organization: 'The Company'
 #  region: 'China'
-exporter_is_install: '{{ os_exporter | bool | to_json }}' # 是否部署普罗米修斯客户端。
 consul_public_register: false # 是否向公共领事注册普罗米修斯终端。
 consul_public_exporter_token: '00000000-0000-0000-0000-000000000000' # 公共领事客户端访问控制令牌。
 consul_public_http_port: '8500' # 公共领事公共客户端端口。

@@ -52,11 +52,13 @@
   when: os_software | bool
   tags: software
 
-
-- name: Include Prometheus Exporter tasks for specific OS
-  include: 'Exporter/{{ ansible_system }}.yml'
-  when: os_exporter | bool
-  tags: exporter
+- name: Registered with HashiCorp Consul
+  include: 'register.yml'
+  loop: '{{ os_linux_exporter_type }}'
+  loop_control:
+    loop_var: os_linux_exporter_type_item
+  when:
+    - consul_public_register | bool
 
 - name: Include OSSec tasks for specific OS
   include: 'OSSec/{{ ansible_system }}.yml'
