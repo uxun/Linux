@@ -1,7 +1,17 @@
 ---
-- hosts: one
+- hosts: ops
   roles: ansible-grafana
   vars:
     grafana_security:
       admin_user: admin
       admin_password: enter_your_secure_password
+    grafana_datasources:
+      - name: prometheus
+        type: prometheus
+        access: proxy
+        url: 'http://IP:PORT'
+        basicAuth: false
+    grafana_dashboards:
+      - dashboard_id: 704
+        revision_id: 1
+        datasource: prometheus

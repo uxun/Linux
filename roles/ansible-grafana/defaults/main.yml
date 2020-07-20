@@ -42,7 +42,7 @@ grafana_server:
 # Security
 grafana_security:
   admin_user: admin
-  admin_password: "admin"
+  admin_password: ""
 #  secret_key: ""
 #  login_remember_days: 7
 #  cookie_username: grafana_user
@@ -192,10 +192,10 @@ grafana_image_storage: {}
 
 #######
 # Plugins from https://grafana.com/plugins
-#grafana_plugins: []
-grafana_plugins:
- - grafana-piechart-panel
- - alexanderzobnin-zabbix-app
+grafana_plugins: []
+#grafana_plugins:
+# - grafana-piechart-panel
+# - alexanderzobnin-zabbix-app
 #  - raintank-worldping-app
 ## Node Exporter grafana-cli plugins install grafana-piechart-panel
 
