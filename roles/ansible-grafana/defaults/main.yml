@@ -229,6 +229,10 @@ grafana_dashboards: []
 #  - dashboard_id: '8919'
 #    revision_id: '9'
 #    datasource: 'Prometheus'
+#  # Mysql Exporter
+#  - dashboard_id: '11323'
+#    datasource: 'Prometheus'
+#
 
 grafana_dashboards_dir: "dashboards"
 
