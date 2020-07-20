@@ -2,6 +2,21 @@
 - name: Include OS-specific variables
   include_vars: '{{ ansible_os_family }}.yml'
 
+- name: OS software operation
+  block:
+    - name: Check if Linux software update already processed
+      stat:
+        path: '/etc/bootstrap_Software.Succeed'
+      register: os_linux_soft_result
+      when: ansible_system == 'Linux'
+    - name: Include Linux software tasks
+      include: 'software.yml'
+      when:
+        - ansible_system == 'Linux'
+        - not os_linux_soft_result.stat.exists | bool
+  when: os_software | bool
+  tags: software
+
 - name: OS initialization configuration operation
   block:
     - name: Check if Linux initialization configuration already processed
@@ -36,21 +51,6 @@
         - not os_linux_harden_result.stat.exists | bool
   when: os_harden | bool
   tags: harden
-
-- name: OS software operation
-  block:
-    - name: Check if Linux software update already processed
-      stat:
-        path: '/etc/bootstrap_Software.Succeed'
-      register: os_linux_soft_result
-      when: ansible_system == 'Linux'
-    - name: Include Linux software tasks
-      include: 'software.yml'
-      when:
-        - ansible_system == 'Linux'
-        - not os_linux_soft_result.stat.exists | bool
-  when: os_software | bool
-  tags: software
 
 - name: Registered with HashiCorp Consul
   include: 'register.yml'
