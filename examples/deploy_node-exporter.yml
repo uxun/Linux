@@ -1,0 +1,19 @@
+---
+- hosts: ops
+  roles: 
+  - ansible-node_exporter
+  vars:
+    #node_exporter_binary_local_dir: "/usr/local/src/node_exporter-1.0.1.linux-amd64"
+    node_exporter_version: 1.0.1
+    node_exporter_web_listen_address: "0.0.0.0:9100"
+    node_exporter_textfile_dir: "/var/lib/node_exporter"
+
+    node_exporter_enabled_collectors:
+      - systemd
+      - filesystem:
+          ignored-mount-points: "^/(sys|proc|dev)($|/)"
+          ignored-fs-types: "^(sys|proc|auto)fs$"
+
+    node_exporter_disabled_collectors:
+      - xfs
+      - pressure
