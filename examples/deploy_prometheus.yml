@@ -1,0 +1,32 @@
+---
+- hosts: ops2
+  roles:
+  - ansible-prometheus
+  vars:
+    prometheus_version: "2.19.2"
+    prometheus_config_dir: /etc/prometheus
+    prometheus_db_dir: /data/prometheus
+    prometheus_web_listen_address: "0.0.0.0:9090"
+    prometheus_storage_retention: "15d"
+    prometheus_storage_retention_size: "0"
+    prometheus_global:
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      evaluation_interval: 15s
+    prometheus_scrape_configs:
+      - job_name: "prometheus"
+        static_configs:
+          - targets:
+              - "192.168.100.102:9090"
+      - job_name: "node"
+        file_sd_configs:
+          - files:
+              - "/etc/prometheus/file_sd/node_*.yml"
+            refresh_interval: 1m
+      - job_name: "mysql"
+        scrape_interval: 30s
+        scrape_timeout:  5s
+        file_sd_configs:
+          - files:
+              - "/etc/prometheus/file_sd/mysql_*.yml"
+            refresh_interval: 1m

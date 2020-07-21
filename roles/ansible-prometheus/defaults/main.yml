@@ -4,7 +4,7 @@ prometheus_binary_local_dir: ''
 prometheus_skip_install: false
 
 prometheus_config_dir: /etc/prometheus
-prometheus_db_dir: /data/prometheus
+prometheus_db_dir: /var/lib/prometheus
 
 prometheus_web_listen_address: "0.0.0.0:9090"
 prometheus_web_external_url: ''
@@ -20,8 +20,6 @@ prometheus_config_flags_extra: {}
 #   storage.tsdb.retention: 15d
 #   alertmanager.timeout: 10s
 
-# refernece
-# https://prometheus.io/docs/prometheus/latest/configuration/configuration/#alertmanager_config
 prometheus_alertmanager_config: []
 # prometheus_alertmanager_config:
 #   - scheme: https
