@@ -1,0 +1,51 @@
+---
+- hosts: db
+  roles:
+    - ansible-mysqld_exporter
+  vars:
+    mysqld_exporter_dsn: "mysqld_exporter:K6uYGM9C.8Lnyu4o@(127.0.0.1:63307)/"
+    mysqld_exporter_web_listen_address: "0.0.0.0:9104"
+    mysqld_exporter_collect: [] 
+      #- slave_status
+      #- slave_hosts
+      #- heartbeat
+      #- heartbeat.database
+      #- heartbeat.table
+      #- heartbeat.utc
+      #- auto_increment.columns
+      #- binlog_size
+      #- engine_innodb_status
+      #- global_status
+      #- global_variables
+      #- info_schema.clientstats
+      #- info_schema.innodb_cmp
+      #- info_schema.innodb_cmpmem
+      #- info_schema.processlist
+      #- info_schema.processlist.min_time 
+      #- info_schema.query_response_time
+      #- info_schema.tables
+      #- info_schema.tables.databases
+      #- info_schema.tablestats
+      #- info_schema.schemastats
+      #- info_schema.userstats
+      #- perf_schema.eventswaits
+      #- perf_schema.file_instances
+      # > 5.5
+      #- engine_tokudb_status
+      #- info_schema.innodb_metrics 
+      #- info_schema.innodb_tablespaces
+      #- info_schema.replica_host
+      #- perf_schema.eventsstatements
+      #- perf_schema.eventsstatements.digest_text_limit
+      #- perf_schema.eventsstatements.limit
+      #- perf_schema.eventsstatements.timelimit
+      #- perf_schema.eventsstatementssum
+      #- perf_schema.file_events 
+      #- perf_schema.indexiowaits
+      #- perf_schema.tableiowaits
+      #- perf_schema.tablelocks
+      #- perf_schema.replication_group_members
+      #- perf_schema.replication_group_member_stats
+      #- perf_schema.replication_applier_status_by_worker
+    mysqld_exporter_no_collect: []
+    
