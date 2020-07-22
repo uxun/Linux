@@ -1,0 +1,23 @@
+---
+- hosts: ops
+  roles:
+    - ansible-alertmanager
+  vars:
+    alertmanager_version: "0.21.0"
+    alertmanager_binary_local_dir: '/usr/local/src/alertmanager-0.21.0.linux-amd64'
+    alertmanager_web_listen_address: "0.0.0.0:9093"
+    alertmanager_web_external_url: "http://127.0.0.1:9093"
+    alertmanager_config_dir: "/etc/alertmanager"
+    alertmanager_db_dir: "/data/alertmanager"
+    alertmanager_resolve_timeout: "3m"
+    alertmanager_route:
+       group_by: ['alertname', 'cluster', 'service']
+       group_wait: 30s
+       group_interval: 1m
+       repeat_interval: 1h
+       receiver: dingtalk.webhook
+    alertmanager_receivers:
+      - name: dingtalk.webhook
+        webhook_configs:
+          - send_resolved: false
+            url: http://127.0.0.1:8060/dingtalk/webhook1/send
