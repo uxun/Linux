@@ -1,0 +1,102 @@
+---
+- name: Create the Webhook Dingtalk group
+  group:
+    name: "{{ __webhook_dingtalk_group }}"
+    state: present
+    system: true
+
+- name: Create the Webhook Dingtalk user
+  user:
+    name: "{{ __webhook_dingtalk_user }}"
+    groups: "{{ __webhook_dingtalk_group }}"
+    append: true
+    shell: /usr/sbin/nologin
+    system: true
+    createhome: false
+    home: /
+
+- name: Create Webhook Dingtalk Dir
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    owner: "root"
+    group: "{{ __webhook_dingtalk_user }}"
+  with_items:
+    - "{{ webhook_dingtalk_config_dir }}"
+
+- block:
+    - name: Download Webhook Dingtalk binary to local folder
+      become: false
+      get_url:
+        url: "https://github.com/timonwong/prometheus-webhook-dingtalk/releases/download/v{{ webhook_dingtalk_version }}/prometheus-webhook-dingtalk-{{ webhook_dingtalk_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}.tar.gz"
+        dest: "/tmp/prometheus-webhook-dingtalk-{{ webhook_dingtalk_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}.tar.gz"
+        checksum: "sha256:{{ __webhook_dingtalk_checksum }}"
+      register: _download_binary
+      until: _download_binary is succeeded
+      retries: 5
+      delay: 2
+      delegate_to: localhost
+      check_mode: false
+
+    - name: Unpack webhook_dingtalk binary
+      become: false
+      unarchive:
+        src: "/tmp/prometheus-webhook-dingtalk-{{ webhook_dingtalk_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}.tar.gz"
+        dest: "/tmp"
+        creates: "/tmp/prometheus-webhook-dingtalk-{{ webhook_dingtalk_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}/prometheus-webhook-dingtalk"
+      delegate_to: localhost
+      check_mode: false
+
+    - name: Propagate webhook_dingtalk binaries
+      copy:
+        src: "/tmp/prometheus-webhook-dingtalk-{{ webhook_dingtalk_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}/prometheus-webhook-dingtalk"
+        dest: "/usr/local/bin/prometheus-webhook-dingtalk"
+        mode: 0755
+        owner: root
+        group: root
+      notify:
+        - restart webhook dingtalk
+      when: not ansible_check_mode
+  when: webhook_dingtalk_binary_local_dir | length == 0
+
+- name: propagate locally distributed webhook_dingtalk binary
+  copy:
+    src: "{{ webhook_dingtalk_binary_local_dir }}/prometheus-webhook-dingtalk"
+    dest: "/usr/local/bin/prometheus-webhook-dingtalk"
+    mode: 0755
+    owner: root
+    group: root
+  when: webhook_dingtalk_binary_local_dir | length > 0
+  notify: restart webhook dingtalk
+
+- name: Copy Webhook Dingtalk template.tmpl file
+  copy:
+    src: "{{ item }}"
+    dest: "{{ webhook_dingtalk_config_dir}}/{{ item }}"
+    owner: root
+    group: "{{ __webhook_dingtalk_user }}"
+    mode: 0664
+  with_items:
+    - "new.tmpl"
+    - "old.tmpl"
+
+- name: Copy Webhook Dingtalk configuration file
+  copy:
+    src: "config.yml"
+    dest: "{{ webhook_dingtalk_config_dir}}/config.yml"
+    owner: root
+    group: "{{ __webhook_dingtalk_user }}"
+    mode: 0664
+  notify: restart webhook dingtalk
+
+- name: Copy the webhook_dingtalk systemd service file
+  template:
+    src: webhook_dingtalk.service.j2
+    dest: /etc/systemd/system/webhook_dingtalk.service
+    owner: root
+    group: root
+    mode: 0644
+  no_log: "{{ not lookup('env', 'ANSIBLE_DEBUG') | bool }}"
+  notify:
+   - restart webhook dingtalk

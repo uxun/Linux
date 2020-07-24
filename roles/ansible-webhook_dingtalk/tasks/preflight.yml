@@ -1,0 +1,25 @@
+---
+- name: Assert usage of systemd as an init system
+  assert:
+    that: ansible_service_mgr == 'systemd'
+    msg: "This role only works with systemd"
+
+- name: Get systemd version
+  command: systemctl --version
+  changed_when: false
+  check_mode: false
+  register: __systemd_version
+  tags:
+    - skip_ansible_lint
+
+- name: Naive assertion of proper listen address
+  assert:
+    that:
+      - "':' in webhook_dingtalk_web_listen_address"
+
+- name: "Get checksum for {{ go_arch_map[ansible_architecture] | default(ansible_architecture) }} architecture"
+  set_fact:
+    __webhook_dingtalk_checksum: "{{ item.split(' ')[0] }}"
+  with_items:
+    - "{{ lookup('url', 'https://github.com/timonwong/prometheus-webhook-dingtalk/releases/download/v' + webhook_dingtalk_version + '/sha256sums.txt', wantlist=True) | list }}"
+  when: "('linux-' + (go_arch_map[ansible_architecture] | default(ansible_architecture)) + '.tar.gz') in item"

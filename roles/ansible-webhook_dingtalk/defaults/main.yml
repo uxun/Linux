@@ -1,0 +1,10 @@
+---
+webhook_dingtalk_config_dir: "/etc/dingtalk"
+webhook_dingtalk_binary_local_dir: ""
+webhook_dingtalk_version: 1.4.0
+webhook_dingtalk_web_listen_address: ":8060"
+webhook_dingtalk_flags: []
+#webhook_dingtalk_flags:
+#  - web.enable-ui
+#  - web.enable-lifecycle 
+#  - config.file=/etc/dingtalk/config.yml

@@ -1,0 +1,27 @@
+[Unit]
+Description=Webhook Dingtalk
+After=network-online.target
+
+[Service]
+Type=simple
+User={{ __webhook_dingtalk_user }}
+Group={{ __webhook_dingtalk_group }}
+ExecStart=/usr/local/bin/prometheus-webhook-dingtalk \
+    {% for c in webhook_dingtalk_flags -%}
+    {%   if not c is mapping -%}
+    --{{ c }} \
+    {%   else -%}
+    {%     set name,opt = (c.items() | list)[0] -%}
+    {%     for k,v in opt.items() -%}
+    --{{ name }}.{{ k }}={{ v }} \
+    {%     endfor -%}
+    {%   endif -%}
+    {% endfor -%}
+    --web.listen-address={{ webhook_dingtalk_web_listen_address }}
+
+SyslogIdentifier=webhook_dingtalk
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
