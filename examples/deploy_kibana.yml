@@ -2,3 +2,13 @@
 - hosts: server
   roles:
   - ansible-role-kibana
+  vars:
+    kibana_version: "7.x"
+    kibana_package: kibana
+    kibana_service_state: started
+    kibana_service_enabled: true
+    kibana_server_port: 5601
+    kibana_server_host: "0.0.0.0"
+    kibana_elasticsearch_url: "http://192.168.86.111:9200"
+    kibana_elasticsearch_username: ""
+    kibana_elasticsearch_password: ""
