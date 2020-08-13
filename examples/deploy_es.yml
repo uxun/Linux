@@ -1,0 +1,20 @@
+---
+- hosts: addhosts
+  remote_user: root
+  roles:
+    - role: ansible-elasticsearch
+  vars:
+    es_data_dirs:
+      - "/data/elasticsearch/data"
+    es_log_dir: "/data/elasticsearch/logs"
+    es_config:
+      node.name: "cbs-node1"
+      cluster.name: "cbs-cluster"
+      discovery.seed_hosts: "192.168.81.27:9300"
+      http.port: 9200
+      transport.port: 9300
+      node.data: true
+      node.master: true
+      bootstrap.memory_lock: true
+    es_heap_size: 1g
+    es_api_port: 9200
