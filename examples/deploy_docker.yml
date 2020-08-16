@@ -1,0 +1,30 @@
+---
+- hosts: ansible-docker
+  rules:
+    - ansible-docker
+  vars:
+    docker_users: []
+    docker_package_list:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      - docker-ce-19.03.8
+      - docker-ce-cli-19.03.8
+      - containerd.io
+    docker_compose_version: "1.26.0"
+    docker__daemon_json: |
+      "exec-opts": ["native.cgroupdriver=systemd"],
+      "registry-mirrors": ["https://docker.mirrors.ustc.edu.cn"],
+      "max-concurrent-downloads": 10,
+      "log-driver": "json-file",
+      "log-level": "warn",
+      "log-opts": {
+        "max-size": "100m",
+        "max-file": "2"
+        },
+      "storage-driver": "overlay2",
+      "storage-opts": [
+        "overlay2.override_kernel_check=true"
+      ],
+      "data-root": "/var/lib/docker"
+
