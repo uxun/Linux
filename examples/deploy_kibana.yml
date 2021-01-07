@@ -1,7 +1,7 @@
 ---
 - hosts: server
   roles:
-  - ansible-role-kibana
+  - ansible-kibana
   vars:
     kibana_version: "7.x"
     kibana_package: kibana

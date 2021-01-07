@@ -1,21 +1,21 @@
 ---
-# 主任务参数 #
-# 是否执行主机初始配置
+# 主任务参数 
+# 1.是否执行主机初始配置
 os_config: true   
 
-# 是否挂载数据盘
+# 2.是否挂载数据盘
 os_datadisc: false
 
-# 是否执行主机加固配置。
+# 3.是否执行主机加固配置。
 os_harden: true   
 
-# 是否执行主机基本软件安装和更新。
+# 4.是否执行主机基本软件安装和更新。
 os_software: true                        
 
-# 是否部署入侵检测客户端。
+# 5.是否部署入侵检测客户端。
 os_ossec: false    
 
-# Linux 初始参数 config.yml #
+# Linux 初始参数                          ---> 配置文件 config.yml 
 os_linux_tz: 'Asia/Shanghai'              # 主机时区。
 os_linux_id_rsa: true                     # 复制当前主机SSH密钥到目标主机。
 os_linux_sysctl: false                    # 开启内核参数
@@ -45,15 +45,14 @@ os_time_server:                           # 时间服务器。
   - 'ntp3.aliyun.com'
   - 'ntp4.aliyun.com'
 
-# syslog远程日志参数 rsyslog.yml #
+# syslog远程日志参数                          ---> 配置文件 rsyslog.yml
 syslog: false                                 # 是否启用远程日志。
 syslog_port: '12201'                          # 远程日志服务器端口。
 syslog_protocol: 'udp'                        # 远程日志服务器协议。
 syslog_server:                                # 远程日志服务器地址列表。
   - '127.0.0.1'
     
-
-# Linux 数据盘参数 datadisc.yml #
+# Linux 数据盘参数                            ---> 配置文件 datadisc.yml 
 os_linux_disc_device: 'sdb'                   # 数据盘块设备。
 os_linux_fsopts: 'defaults,noatime,nobarrier' # 数据盘挂载参数。
 os_linux_fstype: 'xfs'                        # 数据盘文件系统。
@@ -62,13 +61,13 @@ os_linux_lv_size: '100%FREE'                  # 逻辑卷容量。
 os_linux_mount_point: '/data'                 # 逻辑卷挂载点。
 os_linux_vg: 'VG01'                           # 逻辑卷卷组名称。
 
-# 主机加固配置参数 harden.yml #
+# 主机加固配置参数                            ---> 配置文件 harden.yml 
 os_linux_sshport: 22                          # ssh_port 
 os_linux_disable_RootLogin: false             # 是否禁用root登录。
 os_linux_disable_selinux: true                # 是否禁用selinux。
 #os_update_password: 'changeme'               # 修改新部署Linux主机管理账户密码。
 
-# 审计参数 audit.yml #
+# 审计参数                                    ---> 配置文件 audit.yml 
 os_audit: false                               # 是否启用主机审计。
 os_audit_type: 'auditbeat'                    # 审计进程服务类型，auditbeat 或 auditd。
 os_auditbeat_version: '7.7.1'                 # Beats 版本。
@@ -124,8 +123,8 @@ os_linux_audit_rules:
   - '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -k delete'
 
 # 入侵检测系统参数 #
-ossec_version: '3.10.2-1' # WAZUH代理版本。
-ossec_managers: # WAZUH管理器参数。
+ossec_version: '3.10.2-1'                   # WAZUH代理版本。
+ossec_managers:                             # WAZUH管理器参数。
   address:
     - '1.1.1.1'
   port: '1517'
@@ -133,12 +132,12 @@ ossec_managers: # WAZUH管理器参数。
   api_port: '55000'
   api_proto: 'https'
   api_user: null
-ossec_agent_authd: # WAZUH代理注册参数。
+ossec_agent_authd:                          # WAZUH代理注册参数。
   address: '{{ ossec_managers.address[0] }}'
   authd_pass: 'Bf6vJRT4WaEAHq'
   port: '1515'
   ssl_auto_negotiate: 'no'
-ossec_agent_config: # WAZUH代理参数。
+ossec_agent_config:                         # WAZUH代理参数。
   auto_restart: 'yes'
   notify_time: '10'
   time_reconnect: '60'
@@ -150,22 +149,22 @@ ossec_agent_config: # WAZUH代理参数。
     ca_verification: 'yes'
   log_format: 'plain'
 
-# 公共领事配置参数 #
-environments: 'Development' # 定义系统环境。
-datacenter: 'dc01' # 定义数据中心。
-domain: 'local' # 定义域信息。
-#hardware_sn: 'XXXXXXX' # 设备序列编号。
-#hardware_pn: 'XXXXXXXXXXX' # 设备服务编号。
-#hardware_cu: 'A-1' # 设备机架编号。
-#tags: # 对象自定义标签
+# consul(公共领事)配置参数 #
+environments: 'Development'                # 定义系统环境。
+datacenter: 'dc01'                         # 定义数据中心。
+domain: 'local'                            # 定义域信息。
+#hardware_sn: 'XXXXXXX'                    # 设备序列编号。
+#hardware_pn: 'XXXXXXXXXXX'                # 设备服务编号。
+#hardware_cu: 'A-1'                        # 设备机架编号。
+#tags:                                     # 对象自定义标签
 #  subscription: 'default'
 #  owner: 'nobody'
 #  department: 'Infrastructure'
 #  organization: 'The Company'
 #  region: 'China'
-consul_public_register: false # 是否向公共领事注册普罗米修斯终端。
+consul_public_register: false              # 是否向公共领事注册普罗米修斯终端。
 consul_public_exporter_token: '00000000-0000-0000-0000-000000000000' # 公共领事客户端访问控制令牌。
-consul_public_http_port: '8500' # 公共领事公共客户端端口。
-consul_public_http_prot: 'https' # 公共领事公共客户端协议。
-consul_public_clients: # 公共领事公共客户端列表。
+consul_public_http_port: '8500'            # 公共领事公共客户端端口。
+consul_public_http_prot: 'https'           # 公共领事公共客户端协议。
+consul_public_clients:                     # 公共领事公共客户端列表。
   - '127.0.0.1'

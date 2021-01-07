@@ -58,25 +58,34 @@ zabbix_repo_yum:
 # Zabbix API stuff
 zabbix_agent_server_url: "http://192.168.100.11/zabbix" #set
 zabbix_url: "{{ zabbix_agent_server_url }}"
+
+# 基于api访问zabbix网址
+zabbix_api_user: Admin  #set
+zabbix_api_pass: zabbix  #set
+
 # 基本身份验证访问zabbix网址的http用户
 # zabbix_api_http_user: admin
 # zabbix_api_http_password: admin
-zabbix_api_user: Admin  #set
-zabbix_api_pass: zabbix  #set
+
 # 启用Zabbix API创建/删除主机或者主机组时，api_create_host* 为True
 zabbix_api_create_hostgroup: True
 zabbix_api_create_hosts: True
+
 # zabbix_api_create_hostgroup = True ,present 创建主机组，absent 删除主机组
 zabbix_create_hostgroup: present  # or absent
 zabbix_create_host: present       # or absent
+
 # zabbix_api_create_hosts = True ,更新已有主机
 zabbix_update_host: yes
 zabbix_host_status: enabled       # or disabled
 zabbix_proxy: null
+
 # 配置Zabbix库存模式,automatic 为自动生成库存数据。
 zabbix_inventory_mode: disabled
+
 # 1:ip, 0:fqdn
 zabbix_useuip: 1
+
 # 此主机所属的主机组列表。
 zabbix_host_groups: #set
   - Linux servers
@@ -126,12 +135,14 @@ zabbix_agent_refreshactivechecks: 120
 zabbix_agent_buffersend: 5
 zabbix_agent_buffersize: 100
 zabbix_agent_maxlinespersecond: 100
+
 # 允许代理以“ root”身份运行。0-不允许，1-允许
 zabbix_agent_allowroot: 0
 zabbix_agent_zabbix_alias:
 zabbix_agent_timeout: 3
 zabbix_agent_include: /etc/zabbix/zabbix_agentd.d
 zabbix_agent_unsafeuserparameters: 0
+
 # 用户参数名称和脚本（如果有）的列表
 #zabbix_agent_userparameters: []
 zabbix_agent_userparameters: #set

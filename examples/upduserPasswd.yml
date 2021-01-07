@@ -1,0 +1,14 @@
+---
+- hosts:
+  - sov
+  remote_user: root
+  gather_facts: no
+  vars:
+    # 
+    username: myztuser
+    # created with:
+    # python -c 'import crypt; print crypt.crypt("This is my Password", "$1$SomeSalt$")'
+    password: $1$SomeSalt$l2s.z3m6JShyNRLB32VDa/
+  tasks:
+    - name: User:{{username}} and Change user Password 
+      user: name={{ username }} password={{ password }} update_password=always
